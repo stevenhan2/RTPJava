@@ -6,13 +6,13 @@ import java.util.zip.CRC32;
 // REMOVED FROM TCP
 // public static final int URG = 0b100000;
 
-public static final int ACK = 0b1000;
+public static final int ACK = 8;
 
 // REMOVED FROM TCP
 // public static final int PSH = 0b001000;
-public static final int RST = 0b0100;
-public static final int SYN = 0b0010;
-public static final int FIN = 0b0001;
+public static final int RST = 4;
+public static final int SYN = 2;
+public static final int FIN = 1;
 
 public class RTPDatagram {
 	public int sourcePort;
@@ -42,7 +42,7 @@ public class RTPDatagram {
 		this.flags = flags;
 
 		this.receiveWindow = receiveWindow;
-		receiveWindowSize = (int) (Math.log((double) receiveWindow..length())/Math.log(2.0) + 1);
+		receiveWindowSize = (int) (Math.log((double) receiveWindow.length())/Math.log(2.0) + 1);
 		this.data = data;
 	}
 

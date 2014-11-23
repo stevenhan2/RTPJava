@@ -1,3 +1,4 @@
+import java.util.*;
 import java.net.*;
 
 public static final int DEFAULT_RECEIVE_WINDOW_BYTE_AMOUNT = 65535;
@@ -11,15 +12,14 @@ public class RTPSocket {
 	public DatagramSocket datagramSocket;
 
 	public InetSocketAddress bindAddress;
-	public ByteBuffer receiveWindow;
+	public byte[] receiveWindow;
 
-	public ByteBuffer sendBuffer;
-	public ByteBuffer receiveBuffer;
+	public ArrayList<DatagramPacket> receiveBuffer;
 
 	public RTPSocket(){
 		state = CLOSED;
 
-		receiveWindow = new ByteBuffer();
+		receiveWindow = new byte[];
 		receiveWindow.put(DEFAULT_RECEIVE_WINDOW_BYTE_AMOUNT);
 	}
 
@@ -34,11 +34,11 @@ public class RTPSocket {
 	    		datagramSocket = new DatagramSocket(address);
 
 	    		RTPDatagram synRTPDatagram = RTPDatagram(
-	    			new Port(bindAddress.getPort()),
-	    			new Port(address.getPort()),
+	    			bindAddress.getPort(),
+	    			address.getPort(),
 	    			RTPDatagram.SYN,
 	    			receiveWindow,
-	    			new ByteBuffer()
+	    			new byte[0]
     			);
 
 	    		byte[] synRTPDatagramArray = synRTPDatagram.array();
@@ -60,7 +60,7 @@ public class RTPSocket {
     	datagramSocket.bind(bindAddress);
     }
 
-    public void send(ByteBuffer buffer){
+    public void send(byte[] data){
     }
 
     public void listen(){
