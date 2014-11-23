@@ -8,11 +8,11 @@ public class RTPUtil {
 		}
 	}
 	
-	public int toInt(byte b){
+	public static int toInt(byte b){
 		return ((int)b) & 0xFF;
 	}
 
-	public byte[] toBytes(int i)
+	public static byte[] toBytes(int i)
 	{
 		byte[] result = new byte[4];
 
@@ -24,7 +24,7 @@ public class RTPUtil {
 		return result;
 	}
 
-	public byte[] toIntBytes(long i)
+	public static byte[] toIntBytes(long i)
 	{
 		byte[] result = new byte[4];
 
@@ -37,7 +37,7 @@ public class RTPUtil {
 	}
 
 
-	public void writeByteArrayToByteArrayOutputStream(byte[] bytes, ByteArrayOutputStream bb){
+	public static void writeByteArrayToByteArrayOutputStream(byte[] bytes, ByteArrayOutputStream bb){
 		for (int i = 0; i < bytes.length; i++){
 			bb.write(bytes[i]);
 		}
