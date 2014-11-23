@@ -1,4 +1,4 @@
-import java.nio.ByteBuffer;
+import java.io.*;
 import java.util.zip.CRC32;
 
 // In practice, the PSH, URG, and the urgent data pointer are not used.
@@ -15,17 +15,17 @@ public static final int SYN = 0b0010;
 public static final int FIN = 0b0001;
 
 public class RTPDatagram {
-	public Port sourcePort;
-	public Port destPort;
+	public int sourcePort;
+	public int destPort;
 
 	public long sequenceNumber;
 	public long ackNumber;
 
 	public int headerLength;
-	public int flags
+	public int flags;
 
 	public int receiveWindowSize;
-	public ByteBuffer receiveWindow;
+	public byte[] receiveWindow;
 
 	// CRC32
 	public long checksum;
@@ -34,24 +34,16 @@ public class RTPDatagram {
 	// public int urgentDataPointer;
 
 
-	ByteBuffer data;
+	byte[] data;
 
-	public RTPDatagram(Port src, Port dest, int flags, ByteBuffer receiveWindow, ByteBuffer data){
+	public RTPDatagram(int src, int dest, int flags, byte[] receiveWindow, byte[] data){
 		this.sourcePort = src;
 		this.destPort = dest;
 		this.flags = flags;
 
 		this.receiveWindow = receiveWindow;
-		receiveWindowSize = (int) (Math.log((double) receiveWindow.array().length())/Math.log(2.0) + 1);
-	}
-
-	public RTPDatagram(int src, int dest, int flags, ByteBuffer receiveWindow, ByteBuffer data){
-		this.sourcePort = new Port(src);
-		this.destPort = new Port(dest);
-		this.flags = flags;
-
-		this.receiveWindow = receiveWindow;
-		receiveWindowSize = (int) (Math.log((double) receiveWindow.array().length())/Math.log(2.0) + 1);
+		receiveWindowSize = (int) (Math.log((double) receiveWindow..length())/Math.log(2.0) + 1);
+		this.data = data;
 	}
 
 	public RTPDatagram(byte[] rawData){
@@ -86,7 +78,7 @@ public class RTPDatagram {
 			receiveWindowByteArray[i] = rawData[rawDataPointer + i];
 		}
 		rawDataPointer += this.receiveWindowSize;
-		receiveWindow = new ByteBuffer(receiveWindowByteArray);
+		receiveWindow = new ByteArrayOutputStream(receiveWindowByteArray);
 
 		this.checksum = (((long)rawData[rawDataPointer]) << 24) + 
 		(((long)rawData[rawDataPointer + 1]) << 16) + 
@@ -94,43 +86,48 @@ public class RTPDatagram {
 		(((long)rawData[rawDataPointer + 3]))) & 0x00000000FFFFFFFFL;
 	}
 
-	public ByteBuffer getHeaderByteBufferNoChecksum(){
-		ByteBuffer bb = new ByteBuffer();
-    	bb.put(sourcePort.getByteBuffer());
-    	bb.put(destPort.getByteBuffer());
+	public byte[] getHeaderByteArrayNoChecksum(){
+		ByteArrayOutputStream bb = new ByteArrayOutputStream();
 
-    	bb.putInt((int) sequenceNumber);
-    	bb.putInt((int) ackNumber);
+		RTPUtil.writeByteArrayToByteArrayOutputStream(RTPUtil.toBytes(sourcePort), bb);
+		RTPUtil.writeByteArrayToByteArrayOutputStream(RTPUtil.toBytes(destPort), bb);
+    	
+    	RTPUtil.writeByteArrayToByteArrayOutputStream(RTPUtil.toIntBytes(sequenceNumber), bb);
+    	RTPUtil.writeByteArrayToByteArrayOutputStream(RTPUtil.toIntBytes(ackNumber), bb);
 
-    	int headerLengthAndFlagsByte = (headerLength & 0xF) | ((flags & 0xF) << 4)
+    	int headerLengthAndFlagsByte = (headerLength & 0xF) | ((flags & 0xF) << 4);
     	RTPUtil.debug(Integer.toBinaryString(headerLengthAndFlagsByte));
 
-    	bb.putByte((byte) (headerLengthAndFlagsByte && 0xFF));
+    	bb.write((headerLengthAndFlagsByte && 0xFF));
+    	bb.write((receiveWindowSize && 0xFF));
 
-    	bb.putByte((byte) (receiveWindowSize && 0xFF));
+    	RTPUtil.writeByteArrayToByteArrayOutputStream(receiveWindow, bb);
 
-    	bb.put(receiveWindow);
     	return bb;
 	}
 
 	public boolean checkChecksum(){
-		ByteBuffer bb = getHeaderByteBufferNoChecksum();
+		ByteArrayOutputStream bb = getHeaderByteArrayOutputStreamNoChecksum();
 
     	CRC32 crc = new CRC32();
-    	crc.update(bb.array());
-    	crc.update(data.array());
+    	crc.update(bb.toByteArray());
+    	crc.update(data);
     	return (this.checksum == crc.getValue());
 	}
 
-    public ByteBuffer getByteBuffer(){
-    	ByteBuffer bb = getHeaderByteBufferNoChecksum();
+    public byte[] getByteArray(){
+    	ByteArrayOutputStream bb = getHeaderByteArrayOutputStreamNoChecksum();
 
     	CRC32 crc = new CRC32();
-    	crc.update(bb.array());
-    	crc.update(data.array());
+    	crc.update(bb.toByteArray());
+    	crc.update(data);
+
     	this.checksum = crc.getValue();
 
-    	bb.putInt((int)(this.checksum & 0x00000000FFFFFFFFL));
+    	RTPUtil.writeByteArrayToByteArrayOutputStream(RTPUtil.toIntBytes(this.checksum), bb);
+
+    	RTPUtil.writeByteArrayToByteArrayOutputStream(data, bb);
+
     	bb.put(data);
     	return bb;
     }
