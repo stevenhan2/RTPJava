@@ -10,7 +10,7 @@ public class RTPTest {
 		int srcPort = 8000;
 		int destPort = 8001;
 		int flags = 8;
-		byte[] receiveWindow = (10000000);
+		byte[] receiveWindow = RTPUtil.toBytes(696969);
 		byte[] data = "Hello World!".getBytes();
 		RTPDatagram datagram = new RTPDatagram(srcPort, destPort, flags, receiveWindow, data);
 
