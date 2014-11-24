@@ -1,4 +1,5 @@
 import java.io.*;
+import java.util.Arrays;
 public class RTPUtil {
 	public static final boolean DEBUG = false;
 	
@@ -48,29 +49,48 @@ public class RTPUtil {
 		return result;
 	}
 
-	public static int compare(byte[] x, byte []){
+	public static int compare(byte[] x, byte[] y){
 		// TIM DO THIS
 		// Watch out for "signed" vs "unsigned"
 		// You can use my printing utilities to help you
 
+		if(Arrays.equals(x, y)){
+			return 0;
+		}
+		else{
+			return 1;
+		}
 		// Return 0 if they're the same
 		// Return 1 if x is bigger
 		// Return -1 if y is bigger
 
 		// x and y not necessarily the same length
 		// Take into account things like x = 00000000 00000001, y = 000000010
-		return 0;
 	}
 
 	public static byte[] add(byte[] x, byte[] y){
 		// TIM DO THIS
 		// Watch out for "signed" vs "unsigned"
 		// x and y should both be unsigned
+<<<<<<< HEAD
 		// You can use my printing utilities to help you
+=======
+		int size;
+		if(x.length > y.length){
+			size = x.length;
+		}else{
+			size = y.length;
+		}
+
+		byte[] result = new byte[size];
+		for(int i = 0; i < size; i++){
+			result[i] = (byte)(x[i] + y[i]);
+		}
+>>>>>>> e96fa7ba87038ba499adc835ef2af21a306798f2
 
 
 		// return sum of x and y in new byte array
-		return null;
+		return result;
 	}
 
 	public static byte[] subtract(byte[] x, byte[] y){
@@ -79,7 +99,19 @@ public class RTPUtil {
 		// Same as previous
 		// x and y should both be unsigned
 
-		return null;
+		int size;
+		if(x.length > y.length){
+			size = x.length;
+		}else{
+			size = y.length;
+		}
+
+		byte[] result = new byte[size];
+		for(int i = 0; i < size; i++){
+			result[i] = (byte)(x[i] - y[i]);
+		}
+
+		return result;
 	}
 
 
