@@ -16,7 +16,7 @@ public class RTPTest {
 		datagram1.updateChecksum();
 
 
-
+		System.out.println(datagram1.toString());
 
 		byte[] datagram1Bytes = datagram1.getByteArray();
 		long checksum1 = datagram1.checksum;
@@ -46,6 +46,15 @@ public class RTPTest {
 		else{
 			System.out.println("checksum does not work");
 		}
+
+		RTPDatagram datagram3 = new RTPDatagram(srcPort, destPort, 4, receiveWindow, data);
+		RTPDatagram datagram4 = new RTPDatagram(srcPort, destPort, 2, receiveWindow, data);
+		RTPDatagram datagram5 = new RTPDatagram(srcPort, destPort, 1, receiveWindow, data);
+		RTPDatagram datagram6 = new RTPDatagram(srcPort, destPort, 3, receiveWindow, data);
+
+
+
+
 
 		
 	}
