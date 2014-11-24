@@ -3,3 +3,7 @@ all:
 
 clean:
 	rm *.class
+
+reset:
+	rm *.class
+	javac -g RTP.java

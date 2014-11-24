@@ -22,7 +22,8 @@ public class RTPDatagram {
 	public long sequenceNumber;
 	public long ackNumber;
 
-	public int headerLength;
+	// Reserved 4 bits for future purposes (possible flags)
+	public int reserved;
 	public int flags;
 
 	public int receiveWindowSize;
@@ -41,39 +42,49 @@ public class RTPDatagram {
 		this.sourcePort = src;
 		this.destPort = dest;
 		this.flags = flags;
+		this.reserved = 0;
 
 		this.receiveWindow = receiveWindow;
-		receiveWindowSize = (int) (Math.log((double) receiveWindow.length/Math.log(2.0)) + 1);
+		receiveWindowSize = receiveWindow.length;
 		RTPUtil.debug("receiveWindowSize:" + receiveWindowSize);
 		this.data = data;
 	}
 
 	public RTPDatagram(byte[] rawData){
+		RTPUtil.debug("Creating RTPDatagram from raw bytes");
 		int rawDataPointer = 0;
 
 		this.sourcePort = ((((int)rawData[rawDataPointer]) << 8)  + ((int)rawData[rawDataPointer + 1])) & 0x0000FFFF;
 		rawDataPointer += 2;
+		RTPUtil.debug("sourcePort:" + this.sourcePort);
 
 		this.destPort = ((((int)rawData[rawDataPointer]) << 8)  + ((int)rawData[rawDataPointer + 1])) & 0x0000FFFF;
 		rawDataPointer += 2;
+		RTPUtil.debug("destPort:" + this.destPort);
 
-		this.sequenceNumber = (((long)rawData[rawDataPointer]) << 24) + 
-		(((long)rawData[rawDataPointer + 1]) << 16) + 
-		(((long)rawData[rawDataPointer + 2]) << 8) + 
-		(((long)rawData[rawDataPointer + 3])) & 0x00000000FFFFFFFFL;
+		this.sequenceNumber = ((RTPUtil.toLong(rawData[rawDataPointer]) << 24) + 
+		(RTPUtil.toLong(rawData[rawDataPointer + 1]) << 16) + 
+		(RTPUtil.toLong(rawData[rawDataPointer + 2]) << 8) + 
+		(RTPUtil.toLong(rawData[rawDataPointer + 3])));
 		rawDataPointer += 4;
+		RTPUtil.debug("sequenceNumber:" + this.sequenceNumber);
 
-		this.ackNumber = (((long)rawData[rawDataPointer]) << 24) + 
-		(((long)rawData[rawDataPointer + 1]) << 16) + 
-		(((long)rawData[rawDataPointer + 2]) << 8) + 
-		(((long)rawData[rawDataPointer + 3])) & 0x00000000FFFFFFFFL;
+		this.ackNumber = ((RTPUtil.toLong(rawData[rawDataPointer]) << 24) + 
+		(RTPUtil.toLong(rawData[rawDataPointer + 1]) << 16) + 
+		(RTPUtil.toLong(rawData[rawDataPointer + 2]) << 8) + 
+		(RTPUtil.toLong(rawData[rawDataPointer + 3])));
 		rawDataPointer += 4;
+		RTPUtil.debug("ackNumber:" + this.ackNumber);
 
-		this.headerLength = rawData[rawDataPointer] & 0xF;
+		this.reserved = rawData[rawDataPointer] & 0xF;
 		this.flags = (rawData[rawDataPointer] >> 4) & 0xF;
 		rawDataPointer += 1;
+		RTPUtil.debug("reserved:" + this.reserved);
+		RTPUtil.debug("flags:" + this.flags);
 
-		this.receiveWindowSize = (rawData[rawDataPointer] << 8) + ((int)rawData[rawDataPointer + 1]) & 0x0000FFFF;
+		this.receiveWindowSize = ((int)rawData[rawDataPointer]) & 0x000000FF;
+		rawDataPointer += 1;
+		RTPUtil.debug("receiveWindowSize:" + this.receiveWindowSize);
 
 		this.receiveWindow = new byte[this.receiveWindowSize];
 		for (int i = 0; i < this.receiveWindowSize; i++){
@@ -81,25 +92,32 @@ public class RTPDatagram {
 		}
 		rawDataPointer += this.receiveWindowSize;
 
-		this.checksum = (((long)rawData[rawDataPointer]) << 24) + 
-		(((long)rawData[rawDataPointer + 1]) << 16) + 
-		(((long)rawData[rawDataPointer + 2]) << 8) + 
-		(((long)rawData[rawDataPointer + 3])) & 0x00000000FFFFFFFFL;
+		this.checksum = (RTPUtil.toLong(rawData[rawDataPointer]) << 24) + 
+		(RTPUtil.toLong(rawData[rawDataPointer + 1]) << 16) + 
+		(RTPUtil.toLong(rawData[rawDataPointer + 2]) << 8) + 
+		(RTPUtil.toLong(rawData[rawDataPointer + 3])) & 0x00000000FFFFFFFFL;
+		rawDataPointer += 4;
+
+		data = new byte[rawData.length - rawDataPointer];
+
+		for (int i = 0; i < data.length; i++){
+			data[i] = rawData[rawDataPointer + i];
+		}
 	}
 
 	public ByteArrayOutputStream getHeaderByteArrayNoChecksum(){
 		ByteArrayOutputStream bb = new ByteArrayOutputStream();
 
-		RTPUtil.writeByteArrayToByteArrayOutputStream(RTPUtil.toBytes(sourcePort), bb);
-		RTPUtil.writeByteArrayToByteArrayOutputStream(RTPUtil.toBytes(destPort), bb);
+		RTPUtil.writeByteArrayToByteArrayOutputStream(RTPUtil.toShortBytes(sourcePort), bb);
+		RTPUtil.writeByteArrayToByteArrayOutputStream(RTPUtil.toShortBytes(destPort), bb);
     	
     	RTPUtil.writeByteArrayToByteArrayOutputStream(RTPUtil.toIntBytes(sequenceNumber), bb);
     	RTPUtil.writeByteArrayToByteArrayOutputStream(RTPUtil.toIntBytes(ackNumber), bb);
 
-    	int headerLengthAndFlagsByte = (headerLength & 0xF) | ((flags & 0xF) << 4);
-    	RTPUtil.debug(Integer.toBinaryString(headerLengthAndFlagsByte));
+    	int reservedAndFlagsByte = (reserved & 0xF) | ((flags & 0xF) << 4);
+    	RTPUtil.debug(Integer.toBinaryString(reservedAndFlagsByte));
 
-    	bb.write((headerLengthAndFlagsByte & 0xFF));
+    	bb.write((reservedAndFlagsByte & 0xFF));
     	bb.write((receiveWindowSize & 0xFF));
 
     	RTPUtil.writeByteArrayToByteArrayOutputStream(receiveWindow, bb);
@@ -116,18 +134,37 @@ public class RTPDatagram {
     	return (this.checksum == crc.getValue());
 	}
 
-    public byte[] getByteArray(){
-    	ByteArrayOutputStream bb = getHeaderByteArrayNoChecksum();
+	public void updateChecksum(){
+		ByteArrayOutputStream bb = getHeaderByteArrayNoChecksum();
 
     	CRC32 crc = new CRC32();
     	crc.update(bb.toByteArray());
     	crc.update(data);
 
     	this.checksum = crc.getValue();
+	}
+
+    public byte[] getByteArray(){
+    	ByteArrayOutputStream bb = getHeaderByteArrayNoChecksum();
 
     	RTPUtil.writeByteArrayToByteArrayOutputStream(RTPUtil.toIntBytes(this.checksum), bb);
     	RTPUtil.writeByteArrayToByteArrayOutputStream(data, bb);
 
     	return bb.toByteArray();
+    }
+
+    public String toString(){
+    	String returnString = "";
+
+    	returnString += 
+
+    	"Source port:" + sourcePort +
+    	"\nDestination port:" + destPort +
+    	"\nSequence number:" + sequenceNumber +
+    	"\nack number:" + ackNumber +
+    	"\nData:" + new String(data);
+
+
+    	return returnString;
     }
 }
