@@ -12,6 +12,8 @@ public class RTPSocket {
 	public DatagramSocket datagramSocket;
 
 	public InetSocketAddress bindAddress;
+	public InetSocketAddress connectionAddress;
+
 	public byte[] receiveWindow;
 
 	public int sequenceNumber;
@@ -28,6 +30,7 @@ public class RTPSocket {
 
     public RTPSocket(InetSocketAddress address){
     	datagramSocket = new DatagramSocket(address);
+    	connectionAddress = address;
     	this();
     }
 
@@ -36,6 +39,8 @@ public class RTPSocket {
     		case CLOSED:
 	    		datagramSocket = new DatagramSocket(address);
 
+	    		// ===========================
+	    		// 1) Send SYN
 	    		RTPDatagram synRTPDatagram = RTPDatagram(
 	    			bindAddress.getPort(),
 	    			address.getPort(),
@@ -44,24 +49,56 @@ public class RTPSocket {
 	    			new byte[0]
     			);
 
+	    		// Set sequence number
 	    		Random rand = new Random();
 	    		this.sequenceNumber = rand.nextInt();
-
 	    		synRTPDatagram.sequenceNumber = this.sequenceNumber;
 
+	    		// Send the packet
 	    		byte[] synRTPDatagramArray = synRTPDatagram.getByteArray();
 	    		DatagramPacket synIPDatagram = new synIPDatagram(synRTPDatagramArray, synRTPDatagramArray.length, address);
-
-
 	    		datagramSocket.send(synIPDatagram);
+	    		state = SYNSENT;
 
-	    		DatagramPacket ackIPDatagram;
+	    		// ===========================
+	    		// 2) Receive a SYN ACK hopefully
+	    		DatagramPacket synAckIPDatagram;
+	    		datagramSocket.receive(synAckIPDatagram);
+	    		RTPDatagram synAckRTPDatagram = new RTPDatagram(synAckIPDatagram.getData());
 
-	    		datagramSocket.receive(ackIPDatagram);
+	    		// If it's a SYN ACK and the ack number is the next sequence number
+	    		if (synAckRTPDatagram.ackNumber = this.sequenceNumber + 1
+	    			&& synAckRTPDatagram.flags & RTPDatagram.SYN > 0
+	    			&& synAckRTPDatagram.flags & RTPDatagram.ACK > 0){
+	    			// It has a SYN
+	    			this.ackNumber = synACKRTPDatagram.sequenceNumber + 1;
+	    			this.sequenceNumber ++;
+	    			this.receiveWindow = synAckRTPDatagram.receiveWindow;
+	    		}
 
-	    		if (ackIPDatagram.)
+	    		// ===========================
+	    		// 3) Send an ACK
+    			RTPDatagram ackRTPDatagram = RTPDatagram(
+	    			bindAddress.getPort(),
+	    			address.getPort(),
+	    			RTPDatagram.ACK,
+	    			receiveWindow,
+	    			new byte[0]
+    			);
 
-    			state = SYNSENT;
+	    		// Set sequence number and ack number
+	    		ackRTPDatagram.sequenceNumber = this.sequenceNumber;
+	    		ackRTPDatagram.ackNumber = this.ackNumber;
+
+	    		// Pack and send
+	    		byte[] ackRTPDatagramArray = ackRTPDatagram.getByteArray();
+	    		DatagramPacket ackIPDatagram = new ackIPDatagram(ackRTPDatagramArray, ackRTPDatagramArray.length, address);
+	    		datagramSocket.send(ackIPDatagram);
+
+	    		// Things for state
+    			state = ESTABLISHED;
+    			connectionAddress = address;
+
 	    		break;
     	}
     }
@@ -77,7 +114,11 @@ public class RTPSocket {
     public void listen(){
     	switch (state) {
     		case CLOSED:
+				
+
 				state = LISTEN;
+
+
 	    		break;
     	}
     }
@@ -93,6 +134,11 @@ public class RTPSocket {
     	}
     }
 
+    public RTPSocket fork(){
+
+
+    	return null;
+    }
 
 
 

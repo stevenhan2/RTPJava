@@ -51,6 +51,7 @@ public class RTPUtil {
 	public static int compare(byte[] x, byte []){
 		// TIM DO THIS
 		// Watch out for "signed" vs "unsigned"
+		// You can use my printing utilities to help you
 
 		// Return 0 if they're the same
 		// Return 1 if x is bigger
@@ -65,6 +66,7 @@ public class RTPUtil {
 		// TIM DO THIS
 		// Watch out for "signed" vs "unsigned"
 		// x and y should both be unsigned
+		// You can use my printing utilities to help you
 
 
 		// return sum of x and y in new byte array
@@ -73,6 +75,7 @@ public class RTPUtil {
 
 	public static byte[] subtract(byte[] x, byte[] y){
 		// TIM DO THIS
+		// You can use my printing utilities to help you
 		// Same as previous
 		// x and y should both be unsigned
 
