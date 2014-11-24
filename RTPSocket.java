@@ -14,6 +14,9 @@ public class RTPSocket {
 	public InetSocketAddress bindAddress;
 	public byte[] receiveWindow;
 
+	public int sequenceNumber;
+	public int ackNumber;
+
 	public ArrayList<DatagramPacket> receiveBuffer;
 
 	public RTPSocket(){
@@ -41,14 +44,22 @@ public class RTPSocket {
 	    			new byte[0]
     			);
 
-	    		byte[] synRTPDatagramArray = synRTPDatagram.array();
+	    		Random rand = new Random();
+	    		this.sequenceNumber = rand.nextInt();
+
+	    		synRTPDatagram.sequenceNumber = this.sequenceNumber;
+
+	    		byte[] synRTPDatagramArray = synRTPDatagram.getByteArray();
 	    		DatagramPacket synIPDatagram = new synIPDatagram(synRTPDatagramArray, synRTPDatagramArray.length, address);
+
 
 	    		datagramSocket.send(synIPDatagram);
 
 	    		DatagramPacket ackIPDatagram;
 
 	    		datagramSocket.receive(ackIPDatagram);
+
+	    		if (ackIPDatagram.)
 
     			state = SYNSENT;
 	    		break;
