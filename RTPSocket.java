@@ -8,6 +8,8 @@ public enum State {
 }
 
 public class RTPSocket {
+	// A connection is identified by combination of source host address, source port, destination host address, and destination port
+
 	public State state;
 	public DatagramSocket datagramSocket;
 
@@ -19,7 +21,12 @@ public class RTPSocket {
 	public int sequenceNumber;
 	public int ackNumber;
 
-	public ArrayList<DatagramPacket> receiveBuffer;
+	public SetPriorityQueue<RTPDatagram> receiveRTPDatagramBuffer;
+
+	// Only for server pretty much
+	public LinkedList<DatagramPacket> receiveBuffer;
+
+	public Thread listenThread;
 
 	public RTPSocket(){
 		state = CLOSED;
@@ -30,6 +37,7 @@ public class RTPSocket {
 
     public RTPSocket(InetSocketAddress address){
     	datagramSocket = new DatagramSocket(address);
+    	datagramSocket.setTimeout(10000);
     	connectionAddress = address;
     	this();
     }
@@ -62,7 +70,8 @@ public class RTPSocket {
 
 	    		// ===========================
 	    		// 2) Receive a SYN ACK hopefully
-	    		DatagramPacket synAckIPDatagram;
+	    		byte[] message = new byte[2048];
+	    		DatagramPacket synAckIPDatagram = new DatagramPacket(message, message.length);
 	    		datagramSocket.receive(synAckIPDatagram);
 	    		RTPDatagram synAckRTPDatagram = new RTPDatagram(synAckIPDatagram.getData());
 
@@ -114,11 +123,11 @@ public class RTPSocket {
     public void listen(){
     	switch (state) {
     		case CLOSED:
-				
-
 				state = LISTEN;
 
-
+				this.receiveBuffer = new LinkedList<DatagramPacket>();
+				this.listenThread = new Thread(new ListenLoop(this.receiveBuffer, this.datagramSocket));
+				this.listenThread.start();
 	    		break;
     	}
     }
@@ -134,13 +143,47 @@ public class RTPSocket {
     	}
     }
 
+    public void addRTPDatagramToBuffer(RTPDatagram d){
+    	if (this.receiveRTPDatagramBuffer == null){
+    		this.receiveRTPDatagramBuffer = new LinkedList<RTPDatagram>();
+    	}
+    	this.receiveRTPDatagramBuffer.add(d);
+    }
+
     public RTPSocket fork(){
-
-
     	return null;
     }
 
+    private static class ListenLoop implements Runnable{
+    	public LinkedList<DatagramPacket> listenLoopReceiveBuffer;
+    	public DatagramSocket listenLoopDatagramSocket;
+    	public boolean run;
 
+    	public Runnable(LinkedList<DatagramPacket> ll, DatagramSocket datagramSocket){
+    		this.listenLoopReceiveBuffer = ll;
+    		run = true;
+    		super();
+    	}
+
+    	public void run(){
+    		while (run){
+	    		try {
+	    			byte[] message = new byte[2048];
+		    		DatagramPacket x = new DatagramPacket(message, message.length);
+		    		datagramSocket.receive(x);
+
+		    		listenLoopReceiveBuffer.add(x);
+		    	} catch (SocketTimeoutException e){
+		    		continue;
+		    	}
+
+			}
+    	}
+
+    	public void stop(){
+    		run = false;
+    	}
+    }
 
 
 }
