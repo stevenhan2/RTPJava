@@ -2,11 +2,13 @@ public class RTPTest {
 
 	public static void main(String args[]){
 		System.out.println("Hello World");
-		int a = -1;
-		int b = -42875;
+		int a = -2130706433;
+		int b = -2139095041;
 		byte[] x = RTPUtil.toBytes(a);
 		byte[] y = RTPUtil.toBytes(b);
-		System.out.println(RTPUtil.compare(x,y));
+		System.out.println("x :" + RTPUtil.printByteArray(x, 4));
+		System.out.println("y :" + RTPUtil.printByteArray(y, 4));
+
 		if(RTPUtil.compare(x, y) == 1 && (a > b) || 
 			RTPUtil.compare(x, y) == 0 && (a == b) || 
 			RTPUtil.compare(x, y) == -1 && (a < b)){

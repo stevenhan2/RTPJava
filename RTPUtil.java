@@ -53,18 +53,18 @@ public class RTPUtil {
 		// TIM DO THIS
 		// Watch out for "signed" vs "unsigned"
 		// You can use my printing utilities to help you
-
 		if(Arrays.equals(x, y)){
 			return 0;
 		}
 		else{
+
 			//x is negative and y is positive
-			if(toInt(x[0]) < 0 && toInt(y[0]) > 0){
-				return 1;
+			if(printByteArray(x,4).substring(0,1).equals("1") && printByteArray(y,4).substring(0,1).equals("0")){
+				return -1;
 
 			//x is positive and y is negative	
-			}else if(toInt(x[0]) > 0 && toInt(y[0]) < 0){
-				return -1;	
+			}else if(printByteArray(x,4).substring(0,1).equals("0") && printByteArray(y,4).substring(0,1).equals("1")){
+				return 1;	
 
 			//x and y are both negative	
 			}else if(toInt(x[0]) < 0 && toInt(y[0]) < 0){
