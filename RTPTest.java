@@ -2,20 +2,43 @@ public class RTPTest {
 
 	public static void main(String args[]){
 		System.out.println("Hello World");
-		int a = -2130706433;
-		int b = -2139095041;
+		int a = 255;
+		int b = 2387058;
 		byte[] x = RTPUtil.toBytes(a);
 		byte[] y = RTPUtil.toBytes(b);
 		System.out.println("x :" + RTPUtil.printByteArray(x, 4));
 		System.out.println("y :" + RTPUtil.printByteArray(y, 4));
 
-		if(RTPUtil.compare(x, y) == 1 && (a > b) || 
-			RTPUtil.compare(x, y) == 0 && (a == b) || 
-			RTPUtil.compare(x, y) == -1 && (a < b)){
+		// if(RTPUtil.compare(x, y) == 1 && (a > b) || 
+		// 	RTPUtil.compare(x, y) == 0 && (a == b) || 
+		// 	RTPUtil.compare(x, y) == -1 && (a < b)){
 
-			System.out.println("PASS");
+		// 	System.out.println("Compare Test: PASS");
+		// }else{
+		// 	System.out.println("Compare Test: FAIL");
+		// }
+
+
+		byte[] z = RTPUtil.add(x,y);
+
+		//System.out.println("z :" + RTPUtil.printByteArray(z, 4));
+
+
+		if(RTPUtil.compare(z, RTPUtil.toBytes(a + b)) == 0 ){
+			System.out.println("Add Test: PASS");
 		}else{
-			System.out.println("FAIL");
+			System.out.println("Add Test: FAIL");
+		}
+
+		z = RTPUtil.subtract(x,y);
+
+
+		//System.out.println("z :" + RTPUtil.printByteArray(z, 4));
+
+		if(RTPUtil.compare(z, RTPUtil.toBytes(a - b)) == 0 ){
+			System.out.println("Subtract Test: PASS");
+		}else{
+			System.out.println("Subtract Test: FAIL");
 		}
 	}
 	

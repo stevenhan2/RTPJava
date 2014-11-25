@@ -116,22 +116,14 @@ public class RTPUtil {
 		// Watch out for "signed" vs "unsigned"
 		// x and y should both be unsigned
 		// You can use my printing utilities to help you
-		int size;
-		if(x.length > y.length){
-			size = x.length;
-		}else{
-			size = y.length;
-		}
 
-		byte[] result = new byte[size];
-		for(int i = 0; i < size; i++){
-			result[i] = (byte)(x[i] + y[i]);
-		}
-		//e96fa7ba87038ba499adc835ef2af21a306798f2
+		int a = toInt(x, 4);
+		int b = toInt(y, 4);
+
+		return toBytes(a + b);
 
 
 		// return sum of x and y in new byte array
-		return result;
 	}
 
 	public static byte[] subtract(byte[] x, byte[] y){
@@ -140,19 +132,10 @@ public class RTPUtil {
 		// Same as previous
 		// x and y should both be unsigned
 
-		int size;
-		if(x.length > y.length){
-			size = x.length;
-		}else{
-			size = y.length;
-		}
+		int a = toInt(x, 4);
+		int b = toInt(y, 4);
 
-		byte[] result = new byte[size];
-		for(int i = 0; i < size; i++){
-			result[i] = (byte)(x[i] - y[i]);
-		}
-
-		return result;
+		return toBytes(a - b);
 	}
 
 
@@ -170,11 +153,17 @@ public class RTPUtil {
 			if (i % tab == 0 && i != 0){
 				returnString += "\n";
 			}
-			returnString += printByte(b[i]) + " ";
+			returnString += printByte(b[i]) + "";
 
 		}
 		return returnString;
 	}
+
+	public static int toInt(byte[] x, int tab){
+		return Integer.parseInt(printByteArray(x, 4), 2);
+	}
+
+
 
 	public static void debug(String s){
 		if (DEBUG){
