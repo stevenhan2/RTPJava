@@ -1,12 +1,7 @@
 import java.util.*;
 import java.net.*;
 
-public class FTAServer extends Thread{
-	   private volatile boolean terminated = false;
-
-	public void run(){
-		System.out.println("Hello World");
-	}
+public class FTAServer{
 
 	/**
 	*fta-server X A P
@@ -16,31 +11,50 @@ public class FTAServer extends Thread{
 	*/
 
 	public static void main(String args[]){
-		boolean terminated = false;
 		InetSocketAddress serverSocket = new InetSocketAddress(Integer.parseInt(args[0]));
 		try{
-		InetAddress ip = InetAddress.getByName(args[1]);
+			InetAddress ip = InetAddress.getByName(args[1]);
 
 		}catch (UnknownHostException e) {
             e.printStackTrace();
-			}
+		}
 		InetSocketAddress UDPSocket = new InetSocketAddress(Integer.parseInt(args[2]));
 
-		while(!terminated){
+		Thread tcpThread = new Thread(new MyRunnable());
+		tcpThread.start();
+
+		boolean terminated = false;
+		while(terminated == false){
 			Scanner scan = new Scanner(System.in);
 			System.out.println("terminate to close, connect to connect");
 			String str1 = scan.nextLine();
-
-
-			(new FTAServer()).start();
-
 			if(str1.equals("terminate")){
+				//terminate(tcpThread);
 				terminated = true;
+			}else if(str1.equals("connect")){
+				connect();
+			}else{
+				System.out.println("sorry, unrecognized commaned");
 			}
-		}
+			
+		}	
+
+	}
+
+	public static void terminate(Thread thread){
+		//thread.stop();
+	}
+
+	public static void connect(){
+
 	}
 
 
+	private static class MyRunnable implements Runnable {
+    	public void run(){
+       	System.out.println("Hello World!");
+    	}
+  	}
 
 
 }
