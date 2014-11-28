@@ -36,7 +36,7 @@ public class RTPDatagram implements Comparable<RTPDatagram>{
 	// public int urgentDataPointer;
 
 
-	byte[] data;
+	public byte[] data;
 
 	public RTPDatagram(int src, int dest, int flags, byte[] receiveWindow, byte[] data){
 		this.sourcePort = src;
@@ -169,6 +169,12 @@ public class RTPDatagram implements Comparable<RTPDatagram>{
     }
 
 	@Override public int compareTo(RTPDatagram datagram) {
-		return ("" + this.sourcePort + this.destPort + this.sequenceNumber).compareTo("" + datagram.sourcePort + datagram.destPort + datagram.sequenceNumber);
+		if (this.sourcePort != datagram.sourcePort){
+			return Integer(this.sourcePort).compareTo(Integer(datagram.sourcePort));
+		} else if (this.destPort != datagram.destPort) {
+			return Integer(this.destPort).compareTo(Integer(datagram.destPort));
+		} else {
+			return Integer(this.sequenceNumber).compareTo(Integer(datagram.sequenceNumber));
+		}
 	}
 }
