@@ -26,15 +26,17 @@ public class FTAServer{
 		boolean terminated = false;
 		while(terminated == false){
 			Scanner scan = new Scanner(System.in);
-			System.out.println("terminate to close, connect to connect");
+			System.out.println("terminate to close, window W to set the max window-size at FTA-Server");
 			String str1 = scan.nextLine();
 			if(str1.equals("terminate")){
 				//terminate(tcpThread);
 				terminated = true;
-			}else if(str1.equals("connect")){
-				connect();
+			}else if(str1.length() > 6 && str1.substring(0, 6).equals("window")){
+				System.out.println(str1.substring(6));
+				int windowSize = Integer.parseInt(str1.substring(7));
+				window(windowSize);
 			}else{
-				System.out.println("sorry, unrecognized commaned");
+				System.out.println("sorry, unrecognized command");
 			}
 			
 		}	
@@ -45,8 +47,9 @@ public class FTAServer{
 		//thread.stop();
 	}
 
-	public static void connect(){
-
+	public static void window(int windowSize){
+		System.out.println("window size set to " + windowSize);
+		//window code
 	}
 
 
