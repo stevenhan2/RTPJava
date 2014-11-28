@@ -1,4 +1,16 @@
+import java.net.*;
 public class RTPTest {
+
+	public static void testRTPSocket(){
+		RTPUtil.debug("Beginning RTPSocket tests");
+		// RTPSocket s1 = new RTPSocket();
+
+		RTPUtil.debug("Going to try to connect to 7080 from 8070");
+		RTPSocket s2 = new RTPSocket(new InetSocketAddress("localhost", 7080));
+		s2.bind(new InetSocketAddress("localhost", 8070));
+		RTPUtil.debug("Listening");
+		s2.listen();
+	}
 
 	public static void testRTPUtilByteOperations(){
 		System.out.println("Hello World");

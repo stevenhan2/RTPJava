@@ -1,6 +1,6 @@
 import java.io.*;
 import java.util.zip.CRC32;
-
+import java.lang.*;
 
 public class RTPDatagram implements Comparable<RTPDatagram>{
 	// In practice, the PSH, URG, and the urgent data pointer are not used.
@@ -170,11 +170,11 @@ public class RTPDatagram implements Comparable<RTPDatagram>{
 
 	@Override public int compareTo(RTPDatagram datagram) {
 		if (this.sourcePort != datagram.sourcePort){
-			return Integer(this.sourcePort).compareTo(Integer(datagram.sourcePort));
+			return new Integer(this.sourcePort).compareTo(new Integer(datagram.sourcePort));
 		} else if (this.destPort != datagram.destPort) {
-			return Integer(this.destPort).compareTo(Integer(datagram.destPort));
+			return new Integer(this.destPort).compareTo(new Integer(datagram.destPort));
 		} else {
-			return Integer(this.sequenceNumber).compareTo(Integer(datagram.sequenceNumber));
+			return new Long(this.sequenceNumber).compareTo(new Long(datagram.sequenceNumber));
 		}
 	}
 }

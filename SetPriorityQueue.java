@@ -1,36 +1,35 @@
 import java.util.*;
-public class SetPriorityQueue extends PriorityQueue {
+public class SetPriorityQueue<E extends Comparable> extends PriorityQueue {
 	
-	public PriorityQueue(){
+	public SetPriorityQueue(){
 		super();
 	}
 
-	public PriorityQueue(Collection<? extends E> c){
+	public SetPriorityQueue(Collection<? extends E> c){
 		super(c);
 	}
 
-	public PriorityQueue(int initialCapacity){
+	public SetPriorityQueue(int initialCapacity){
 		super(initialCapacity);
 	}
 
-	public PriorityQueue(int initialCapacity, Comparator<? super E> comparator){
+	public SetPriorityQueue(int initialCapacity, Comparator<? super E> comparator){
 		super(initialCapacity, comparator);
 	}
 
-	public PriorityQueue(PriorityQueue<? extends E> c){
+	public SetPriorityQueue(SetPriorityQueue<? extends E> c){
 		super(c);
 	}
 
-	public PriorityQueue(SortedSet<? extends E> c){
+	public SetPriorityQueue(SortedSet<? extends E> c){
 		super(c);
 	}
 
-	@Override
 	public boolean offer(E e) {
 	  if (contains(e)) {
 	    return false; 
 	  } else {
-	    super.offer(e);
+	    return super.offer(e);
 	  }
 	}
 }
