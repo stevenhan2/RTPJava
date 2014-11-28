@@ -23,48 +23,55 @@ public class FTAClient{
    		boolean terminated = false;
 		while(terminated == false){
 			Scanner scan = new Scanner(System.in);
-			System.out.println("Options: connect-get F, connect, get F, post F, window W, disconnect");
+			System.out.println("Options: connect, get F, post F, window W, disconnect");
 			String str1 = scan.nextLine();
-			if(str1.equals("connect-get")){
-				connectGet();
-			}else if(str1.equals("connect")){
+
+			// not used since we are doing bi-directional transfer
+			// if(str1.equals("connect-get")){
+			// 	connectGet();
+			// }else 
+
+			if(str1.equals("connect")){
 				connect();
-			}else if(str1.equals("get")){
-				get();
-			}else if(str1.equals("post")){
-				post();
-			}else if(str1.equals("window")){
-				window();
+			}else if(str1.length() > 3 && str1.substring(0,3).equals("get")){
+				get(str1.substring(4));
+			}else if(str1.length() > 4 && str1.substring(0,4).equals("post")){
+				post(str1.substring(5));
+			}else if(str1.length() > 6 && str1.substring(0, 6).equals("window")){
+				int windowSize = Integer.parseInt(str1.substring(7));
+				window(windowSize);
 			}else if(str1.equals("disconnect")){
 				//terminate(tcpThread);
 				terminated = true;
 			}else{
-				System.out.println("sorry, unrecognized commaned");
+				System.out.println("sorry, unrecognized command");
 			}
 			
 		}	
 
   	}
 
-  	public static void connectGet(){
-  		//code for connectGet
-  	}
+  	// public static void connectGet(){
+  	// 	//code for connectGet
+  	// }
 
   	public static void connect(){
 
   	}
 
-  	public static void get(){
+  	public static void get(String fileName){
+  		System.out.println("getting file " + fileName);
 
   	}
 
-  	public static void post(){
-
+  	public static void post(String fileName){
+  		System.out.println("posting file " + fileName);
   	}
 
-  	public static void window(){
-
-  	}
+ 	public static void window(int windowSize){
+		System.out.println("window size set to " + windowSize);
+		//window code
+	}
 
   	public static void disconnect(){
   		
