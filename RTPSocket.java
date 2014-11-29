@@ -61,7 +61,8 @@ public class RTPSocket {
     			connectionAddress = address;
 
     			try {
-		    		this.bind(new InetSocketAddress(InetAddress.getLocalHost(),RTPSocket.getEphemeralPort(InetAddress.getLocalHost())));
+		    		// this.bind(new InetSocketAddress(InetAddress.getLocalHost(),RTPSocket.getEphemeralPort(InetAddress.getLocalHost())));
+		    		this.bind(new InetSocketAddress("0.0.0.0",RTPSocket.getEphemeralPort(InetAddress.getLocalHost())));
 		    	} catch (Exception e){
 		    		e.printStackTrace();
 		    	}
@@ -273,7 +274,7 @@ public class RTPSocket {
 
 		synRTPDatagram.sequenceNumber = number;
 
-		SendThread newThread = new SendThread(this, synRTPDatagram, 5, 50);
+		SendThread newThread = new SendThread(this, synRTPDatagram, 5, DEFAULT_WAIT_AMOUNT);
 		newThread.start();
 		return newThread;
     }
@@ -319,6 +320,7 @@ public class RTPSocket {
     	public void run(){
     		while (keepRunning){
     			RTPUtil.debug("ReceiveBufferLoop: Looping...");
+    			RTPUtil.debug(RTPSocket.this.toString());
 	    		try {
 	    			byte[] message = new byte[2048];
 		    		DatagramPacket examineUDPDatagram = new DatagramPacket(message, message.length);
@@ -326,14 +328,14 @@ public class RTPSocket {
 
 
 		    		byte[] actualLengthDataBytes = RTPUtil.cutByteArray(examineUDPDatagram.getData(), examineUDPDatagram.getLength());
-		    		RTPUtil.debug("orig length:" + examineUDPDatagram.getData().length + " new length:" + actualLengthDataBytes.length);
-		    		RTPUtil.debug(RTPUtil.printByteArray(actualLengthDataBytes, 4));
+		    		// RTPUtil.debug("orig length:" + examineUDPDatagram.getData().length + " new length:" + actualLengthDataBytes.length);
+		    		// RTPUtil.debug(RTPUtil.printByteArray(actualLengthDataBytes, 4));
 
 		    		RTPDatagram examineRTPDatagram = new RTPDatagram(actualLengthDataBytes);
 
 		    		if (!examineRTPDatagram.checkChecksum()){
 		    			RTPUtil.debug("ReceiveBufferLoop: Checksum failed.");
-		    			RTPUtil.debug(examineRTPDatagram.toString());
+		    			// RTPUtil.debug(examineRTPDatagram.toString());
 		    			continue;
 		    		} else {
 		    			RTPUtil.debug("ReceiveBufferLoop: Checksum was correct.");
@@ -353,7 +355,18 @@ public class RTPSocket {
 		    				}
 		    			} else {
 			    			RTPUtil.debug("ReceiveBufferLoop: 3.33 About to see if should put anything in Syn Buffer");
-			    			if (!receiveSynRTPDatagramBuffer.contains(examineUDPDatagram)){
+
+			    			// Needs custom detection
+			    			boolean shouldAdd = true;
+			    			for (int i = 0; i < receiveSynRTPDatagramBuffer.size(); i++){
+			    				if (new RTPDatagram(receiveSynRTPDatagramBuffer.get(i).getData()).equals(examineRTPDatagram)){
+			    					RTPUtil.debug("ReceiveBufferLoop: 3.50 Found same UDP packet in syn buffer");
+			    					shouldAdd = false;
+			    					break;
+			    				}
+			    			}
+			    			// if (!receiveSynRTPDatagramBuffer.contains(examineUDPDatagram)){
+			    			if (shouldAdd){
 			    				receiveSynRTPDatagramBuffer.add(examineUDPDatagram);
 			    				RTPUtil.debug("ReceiveBufferLoop: 3.66 Something added in synbuffer It's size is now " + receiveSynRTPDatagramBuffer.size());
 			    			}
@@ -414,7 +427,7 @@ public class RTPSocket {
     	public byte[] dataToSend;
     	public int retries;
     	public int waitTime;
-    	public boolean ackReceived;
+    	public volatile boolean ackReceived;
     	public RTPDatagram rtpDatagram;
 
     	public SendThread(RTPSocket socket, RTPDatagram rtpDatagram, int retries, int waitTime){
@@ -431,16 +444,17 @@ public class RTPSocket {
     		int counter = 0;
     		RTPUtil.debug("SendThread: running --------");
     		try {
-		   		this.rtpDatagram.updateChecksum();
-		   		RTPUtil.debug(rtpDatagram.toString());
-		   		RTPUtil.debug(RTPUtil.printByteArray(rtpDatagram.getByteArray(), 4));
-				byte[] datagramArray = this.rtpDatagram.getByteArray();
-				DatagramPacket udpDatagram = new DatagramPacket(datagramArray, datagramArray.length, rtpSocket.connectionAddress);
-				this.rtpSocket.datagramSocket.send(udpDatagram);
-				this.rtpSocket.stopAndWait = true;
 
-	    		while (counter < retries && !ackReceived){
-		    		for (RTPDatagram tmp : this.rtpSocket.receiveAckRTPDatagramBuffer){
+    			do {
+			   		this.rtpDatagram.updateChecksum();
+			   		RTPUtil.debug(rtpDatagram.toString());
+			   		// RTPUtil.debug(RTPUtil.printByteArray(rtpDatagram.getByteArray(), 4));
+					byte[] datagramArray = this.rtpDatagram.getByteArray();
+					DatagramPacket udpDatagram = new DatagramPacket(datagramArray, datagramArray.length, rtpSocket.connectionAddress);
+					this.rtpSocket.datagramSocket.send(udpDatagram);
+					this.rtpSocket.stopAndWait = true;
+
+					for (RTPDatagram tmp : this.rtpSocket.receiveAckRTPDatagramBuffer){
 		    			if (tmp.flags * RTPDatagram.ACK > 0 && tmp.ackNumber == rtpSocket.sequenceNumber + 1){
 		    				// RTPUtil.debug("XXXXXXXXXXXXXXX");
 		    				// RTPUtil.debug(this.rtpSocket.toString());
@@ -458,12 +472,13 @@ public class RTPSocket {
 		    		}
 
 		    		if (!ackReceived){
-			    		Thread.currentThread().sleep(waitTime);
-			    		RTPUtil.debug("SendThread: sleeping");
+			    		Thread.sleep(waitTime);
+			    		RTPUtil.debug("SendThread: sleeping " + waitTime);
 		    		}
 
 		    		counter++;
-		    	}
+
+	    		} while (counter < retries && !ackReceived);
 		    } catch (Exception e){
 		    	e.printStackTrace();
 		    }
@@ -471,19 +486,20 @@ public class RTPSocket {
     }
 
     public static int getEphemeralPort(InetAddress address) {
-    	int randomNum;
-    	Random rand = new Random();
-    	do {
-		    // NOTE: Usually this should be a field rather than a method
-		    // variable so that it is not re-seeded every call.
+    	return 4000;
+  //   	int randomNum;
+  //   	Random rand = new Random();
+  //   	do {
+		//     // NOTE: Usually this should be a field rather than a method
+		//     // variable so that it is not re-seeded every call.
 		    
 
-		    // nextInt is normally exclusive of the top value,
-		    // so add 1 to make it inclusive
-		    randomNum = rand.nextInt((65000 - 60000) + 1) + 60000;
-		} while (RTPSocket.isPortInUse(address, randomNum));
+		//     // nextInt is normally exclusive of the top value,
+		//     // so add 1 to make it inclusive
+		//     randomNum = rand.nextInt((65000 - 60000) + 1) + 60000;
+		// } while (RTPSocket.isPortInUse(address, randomNum));
 	    
-	    return randomNum;
+	 //    return randomNum;
 	}
 
     private static boolean isPortInUse(InetAddress host, int port) {

@@ -1,7 +1,7 @@
 import java.net.*;
 public class RTPTestClient {
     public static void main(String[] args) {
-		RTPUtil.debug("Beginning RTPTestClient");
+		System.out.println("Beginning RTPTestClient");
 		// RTPSocket s1 = new RTPSocket();
 
 		int serverPort = Integer.parseInt(args[0]);
@@ -13,23 +13,23 @@ public class RTPTestClient {
 		InetSocketAddress destination = null;
 		try {
 			bindPort = RTPSocket.getEphemeralPort(InetAddress.getLocalHost());
-			bindsource = new InetSocketAddress("localhost", bindPort);
+			bindsource = new InetSocketAddress("0.0.0.0" , bindPort);
 			destination = new InetSocketAddress("localhost", serverPort);
 		} catch (Exception e) {
-			RTPUtil.debug("Was unable to get ephemeral serverPort and create source address");
+			System.out.println("Was unable to get ephemeral serverPort and create source address");
 		}
 
 		if (bindsource != null){
-			RTPUtil.debug("Going to try to connect to " + serverPort + " from " + bindPort);
+			System.out.println("Going to try to connect to " + serverPort + " from " + bindPort);
 			RTPSocket clientRTPSocket = new RTPSocket(new InetSocketAddress("localhost", serverPort));
 
-			RTPUtil.debug("Connecting...");
+			System.out.println("Connecting...");
 			boolean connection = clientRTPSocket.connect(destination);
-			RTPUtil.debug("Connection success:" + connection);
-			RTPUtil.debug(clientRTPSocket.toString());
+			System.out.println("Connection success:" + connection);
+			System.out.println(clientRTPSocket.toString());
 
 			if (connection){
-				RTPUtil.debug("Trying to send \"Hello World!\"");
+				System.out.println("Trying to send \"Hello World!\"");
 				clientRTPSocket.send(helloWorldData);
 			}
 		}	

@@ -50,44 +50,41 @@ public class RTPDatagram implements Comparable<RTPDatagram>{
 	}
 
 	public RTPDatagram(byte[] rawData){
-		RTPUtil.debug("Creating RTPDatagram from raw bytes");
-		RTPUtil.debug("-----------------------------------------------------------------------------");
+		// RTPUtil.debug("Creating RTPDatagram from raw bytes");
+		// RTPUtil.debug("-----------------------------------------------------------------------------");
 		int rawDataPointer = 0;
 
 		this.sourcePort = ((RTPUtil.toInt(rawData[rawDataPointer]) << 8) + (RTPUtil.toInt(rawData[rawDataPointer + 1])))  & 0x0000FFFF;
-
-
-			// ((((int)rawData[rawDataPointer]) << 8)  + ((int)rawData[rawDataPointer + 1])) & 0x0000FFFF;
 		rawDataPointer += 2;
-		RTPUtil.debug("sourcePort:" + this.sourcePort);
+		// RTPUtil.debug("sourcePort:" + this.sourcePort);
 
-		this.destPort = ((((int)rawData[rawDataPointer]) << 8)  + ((int)rawData[rawDataPointer + 1])) & 0x0000FFFF;
+		this.destPort = ((RTPUtil.toInt(rawData[rawDataPointer]) << 8) + (RTPUtil.toInt(rawData[rawDataPointer + 1])))  & 0x0000FFFF;
 		rawDataPointer += 2;
-		RTPUtil.debug("destPort:" + this.destPort);
+		// RTPUtil.debug("destPort:" + this.destPort);
 
 		this.sequenceNumber = ((RTPUtil.toLong(rawData[rawDataPointer]) << 24) + 
 		(RTPUtil.toLong(rawData[rawDataPointer + 1]) << 16) + 
 		(RTPUtil.toLong(rawData[rawDataPointer + 2]) << 8) + 
 		(RTPUtil.toLong(rawData[rawDataPointer + 3])));
 		rawDataPointer += 4;
-		RTPUtil.debug("sequenceNumber:" + this.sequenceNumber);
+		// RTPUtil.debug("sequenceNumber:" + this.sequenceNumber);
 
 		this.ackNumber = ((RTPUtil.toLong(rawData[rawDataPointer]) << 24) + 
 		(RTPUtil.toLong(rawData[rawDataPointer + 1]) << 16) + 
 		(RTPUtil.toLong(rawData[rawDataPointer + 2]) << 8) + 
 		(RTPUtil.toLong(rawData[rawDataPointer + 3])));
 		rawDataPointer += 4;
-		RTPUtil.debug("ackNumber:" + this.ackNumber);
+		// RTPUtil.debug("ackNumber:" + this.ackNumber);
 
 		this.reserved = rawData[rawDataPointer] & 0xF;
 		this.flags = (rawData[rawDataPointer] >> 4) & 0xF;
 		rawDataPointer += 1;
-		RTPUtil.debug("reserved:" + this.reserved);
-		RTPUtil.debug("flags:" + this.flags);
+		// RTPUtil.debug("reserved:" + this.reserved);
+		// RTPUtil.debug("flags:" + this.flags);
 
 		this.receiveWindowSize = ((int)rawData[rawDataPointer]) & 0x000000FF;
 		rawDataPointer += 1;
-		RTPUtil.debug("receiveWindowSize:" + this.receiveWindowSize);
+		// RTPUtil.debug("receiveWindowSize:" + this.receiveWindowSize);
 
 		this.receiveWindow = new byte[this.receiveWindowSize];
 		for (int i = 0; i < this.receiveWindowSize; i++){
@@ -100,14 +97,14 @@ public class RTPDatagram implements Comparable<RTPDatagram>{
 		(RTPUtil.toLong(rawData[rawDataPointer + 2]) << 8) + 
 		(RTPUtil.toLong(rawData[rawDataPointer + 3]))) & 0x00000000FFFFFFFFL;
 		rawDataPointer += 4;
-		RTPUtil.debug("checksum:" + this.checksum);
+		// RTPUtil.debug("checksum:" + this.checksum);
 
 		data = new byte[rawData.length - rawDataPointer];
 
 		for (int i = 0; i < data.length; i++){
 			data[i] = rawData[rawDataPointer + i];
 		}
-		RTPUtil.debug("-----------------------------------------------------------------------------");
+		// RTPUtil.debug("-----------------------------------------------------------------------------");
 	}
 
 	public ByteArrayOutputStream getHeaderByteArrayNoChecksum(){
@@ -120,7 +117,6 @@ public class RTPDatagram implements Comparable<RTPDatagram>{
     	RTPUtil.writeByteArrayToByteArrayOutputStream(RTPUtil.toIntBytes(ackNumber), bb);
 
     	int reservedAndFlagsByte = (reserved & 0xF) | ((flags & 0xF) << 4);
-    	RTPUtil.debug(Integer.toBinaryString(reservedAndFlagsByte));
 
     	bb.write((reservedAndFlagsByte & 0xFF));
     	bb.write((receiveWindowSize & 0xFF));
@@ -137,7 +133,7 @@ public class RTPDatagram implements Comparable<RTPDatagram>{
     	crc.update(bb.toByteArray());
     	crc.update(data);
 
-    	RTPUtil.debug("checking " + this.checksum + " against " + crc.getValue());
+    	// RTPUtil.debug("checking " + this.checksum + " against " + crc.getValue());
     	return new Long(this.checksum).equals(new Long(crc.getValue()));
 	}
 
