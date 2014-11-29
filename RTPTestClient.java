@@ -7,6 +7,8 @@ public class RTPTestClient {
 		int serverPort = Integer.parseInt(args[0]);
 		int bindPort = 0;
 
+		byte[] helloWorldData = "Hello World!".getBytes();
+
 		InetSocketAddress bindsource = null;
 		InetSocketAddress destination = null;
 		try {
@@ -25,6 +27,11 @@ public class RTPTestClient {
 			boolean connection = clientRTPSocket.connect(destination);
 			RTPUtil.debug("Connection success:" + connection);
 			RTPUtil.debug(clientRTPSocket.toString());
+
+			if (connection){
+				RTPUtil.debug("Trying to send \"Hello World!\"");
+				clientRTPSocket.send(helloWorldData);
+			}
 		}	
     }
 }

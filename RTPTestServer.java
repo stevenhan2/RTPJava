@@ -32,6 +32,11 @@ public class RTPTestServer {
 
 			RTPUtil.debug("Accept returned true");
 			RTPUtil.debug(serverRTPSocket.toString());
+
+			String helloWorldString = new String(serverRTPSocket.receive());
+			RTPUtil.debug("helloWorldString:" + helloWorldString);
+
+			RTPUtil.debug(serverRTPSocket.toString());
 		}	
     }
 }

@@ -11,7 +11,7 @@ public class RTPUtil {
 	}
 
 	public static long toLong(byte b){
-		return ((int)b) & 0xFFL;	
+		return ((long)b) & 0xFFL;	
 	}
 
 	// Don't think this is needed
@@ -157,6 +157,18 @@ public class RTPUtil {
 
 		}
 		return returnString;
+	}
+
+	public static byte[] cutByteArray(byte[] b, int length){
+		if (length > b.length){
+			return b;
+		}
+		byte[] newbytearray = new byte[length];
+		for (int i = 0; i < length; i++){
+			newbytearray[i] = b[i];
+		}
+
+		return newbytearray;
 	}
 
 	public static int toInt(byte[] x, int tab){

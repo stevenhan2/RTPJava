@@ -54,7 +54,10 @@ public class RTPDatagram implements Comparable<RTPDatagram>{
 		RTPUtil.debug("-----------------------------------------------------------------------------");
 		int rawDataPointer = 0;
 
-		this.sourcePort = ((((int)rawData[rawDataPointer]) << 8)  + ((int)rawData[rawDataPointer + 1])) & 0x0000FFFF;
+		this.sourcePort = ((RTPUtil.toInt(rawData[rawDataPointer]) << 8) + (RTPUtil.toInt(rawData[rawDataPointer + 1])))  & 0x0000FFFF;
+
+
+			// ((((int)rawData[rawDataPointer]) << 8)  + ((int)rawData[rawDataPointer + 1])) & 0x0000FFFF;
 		rawDataPointer += 2;
 		RTPUtil.debug("sourcePort:" + this.sourcePort);
 
@@ -92,11 +95,12 @@ public class RTPDatagram implements Comparable<RTPDatagram>{
 		}
 		rawDataPointer += this.receiveWindowSize;
 
-		this.checksum = (RTPUtil.toLong(rawData[rawDataPointer]) << 24) + 
+		this.checksum = ((RTPUtil.toLong(rawData[rawDataPointer]) << 24) + 
 		(RTPUtil.toLong(rawData[rawDataPointer + 1]) << 16) + 
 		(RTPUtil.toLong(rawData[rawDataPointer + 2]) << 8) + 
-		(RTPUtil.toLong(rawData[rawDataPointer + 3])) & 0x00000000FFFFFFFFL;
+		(RTPUtil.toLong(rawData[rawDataPointer + 3]))) & 0x00000000FFFFFFFFL;
 		rawDataPointer += 4;
+		RTPUtil.debug("checksum:" + this.checksum);
 
 		data = new byte[rawData.length - rawDataPointer];
 
@@ -132,7 +136,9 @@ public class RTPDatagram implements Comparable<RTPDatagram>{
     	CRC32 crc = new CRC32();
     	crc.update(bb.toByteArray());
     	crc.update(data);
-    	return (this.checksum == crc.getValue());
+
+    	RTPUtil.debug("checking " + this.checksum + " against " + crc.getValue());
+    	return new Long(this.checksum).equals(new Long(crc.getValue()));
 	}
 
 	public void updateChecksum(){
@@ -163,6 +169,7 @@ public class RTPDatagram implements Comparable<RTPDatagram>{
     	"\nSequence number:" + sequenceNumber +
     	"\nAck number:" + ackNumber +
     	"\nflags:" + flags +
+    	"\nchecksum:" + checksum + 
     	"\nData:" + new String(data);
 
 
