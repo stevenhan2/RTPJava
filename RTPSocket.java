@@ -1,4 +1,5 @@
 import java.util.*;
+import java.util.concurrent.*;
 import java.net.*;
 
 public class RTPSocket {
@@ -23,8 +24,8 @@ public class RTPSocket {
 	boolean stopAndWait;
 
 	public SetPriorityQueue<RTPDatagram> receiveDefaultRTPDatagramBuffer;
-	public ArrayList<DatagramPacket> receiveSynRTPDatagramBuffer;
-	public ArrayList<RTPDatagram> receiveAckRTPDatagramBuffer;
+	public CopyOnWriteArrayList<DatagramPacket> receiveSynRTPDatagramBuffer;
+	public CopyOnWriteArrayList<RTPDatagram> receiveAckRTPDatagramBuffer;
 
 	public Thread receiveThread;
 
@@ -52,9 +53,9 @@ public class RTPSocket {
     	RTPUtil.debug("connect(" + address + ")");
     	switch (state) {
     		case CLOSED:
-				this.receiveSynRTPDatagramBuffer = new ArrayList<DatagramPacket>();
+				this.receiveSynRTPDatagramBuffer = new CopyOnWriteArrayList<DatagramPacket>();
 				this.receiveDefaultRTPDatagramBuffer = new SetPriorityQueue<RTPDatagram>();
-				this.receiveAckRTPDatagramBuffer = new ArrayList<RTPDatagram>();
+				this.receiveAckRTPDatagramBuffer = new CopyOnWriteArrayList<RTPDatagram>();
 
     			connectionAddress = address;
 
@@ -177,7 +178,7 @@ public class RTPSocket {
 				Random rand = new Random();
 	    		this.sequenceNumber = (long)(rand.nextInt(500000) + 100000);
 	    		synAckRTPDatagram.sequenceNumber = this.sequenceNumber;
-	    		this.ackNumber = examineRTPDatagram.sequenceNumber + 1;
+	    		this.ackNumber = examineRTPDatagram.sequenceNumber + 1L;
 
 				synAckRTPDatagram.sequenceNumber = this.sequenceNumber;
 				synAckRTPDatagram.ackNumber = this.ackNumber;
@@ -240,6 +241,7 @@ public class RTPSocket {
 
 		try {
 			// Pack and send
+			RTPUtil.debug("Sending ACk ----------------------\n" + ackRTPDatagram.toString());
 			byte[] ackRTPDatagramArray = ackRTPDatagram.getByteArray();
 			DatagramPacket ackUDPDatagram = new DatagramPacket(ackRTPDatagramArray, ackRTPDatagramArray.length, connectionAddress);
 			datagramSocket.send(ackUDPDatagram);
@@ -272,8 +274,8 @@ public class RTPSocket {
 	    		RTPUtil.debug("State set to LISTEN");
 				state = State.LISTEN;
 
-				this.receiveSynRTPDatagramBuffer = new ArrayList<DatagramPacket>();
-				this.receiveAckRTPDatagramBuffer = new ArrayList<RTPDatagram>();
+				this.receiveSynRTPDatagramBuffer = new CopyOnWriteArrayList<DatagramPacket>();
+				this.receiveAckRTPDatagramBuffer = new CopyOnWriteArrayList<RTPDatagram>();
 				this.receiveDefaultRTPDatagramBuffer = new SetPriorityQueue<RTPDatagram>();
 
 				this.receiveThread = new Thread(new ReceiveBufferLoop(this));
@@ -353,7 +355,7 @@ public class RTPSocket {
 		    		}
 
 		    		// We've already received this and acked it, so we'll ack it again
-		    		if (state == State.Established && examineRTPDatagram.sequenceNumber < ackNumber){
+		    		if (state == State.ESTABLISHED && examineRTPDatagram.sequenceNumber < ackNumber){
 		    			sendAck(examineRTPDatagram.sequenceNumber + 1L);
 		    		} else {
 			    		receiveDefaultRTPDatagramBuffer.add(examineRTPDatagram);
@@ -403,7 +405,7 @@ public class RTPSocket {
 				this.rtpSocket.datagramSocket.send(udpDatagram);
 				this.rtpSocket.stopAndWait = true;
 
-	    		while (counter < retries){
+	    		while (counter < retries && !ackReceived){
 		    		for (RTPDatagram tmp : this.rtpSocket.receiveAckRTPDatagramBuffer){
 		    			if (tmp.flags * RTPDatagram.ACK > 0 && tmp.ackNumber == rtpSocket.sequenceNumber + 1){
 							this.rtpSocket.sequenceNumber += 1;
@@ -453,4 +455,23 @@ public class RTPSocket {
 		}
 		return result;
 	}
+
+
+	 public String toString(){
+    	String returnString = "====================Printing RTPSocket=======================";
+
+    	returnString += 
+    	"\nBind address:" + bindAddress +
+    	"\nConnection address:" + connectionAddress +
+    	"\nSequence number:" + sequenceNumber +
+    	"\nAck number:" + ackNumber +
+    	"\nState:" + state + 
+		"\nreceiveDefaultRTPDatagramBuffer.size(): " + receiveDefaultRTPDatagramBuffer.size() +
+		"\nreceiveSynRTPDatagramBuffer.size(): " + receiveSynRTPDatagramBuffer.size() +
+		"\nreceiveAckRTPDatagramBuffer.size(): " + receiveAckRTPDatagramBuffer.size();
+
+
+    	returnString += "\n================================================================";
+    	return returnString;
+    }
 }

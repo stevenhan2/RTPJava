@@ -46,7 +46,6 @@ public class RTPDatagram implements Comparable<RTPDatagram>{
 
 		this.receiveWindow = receiveWindow;
 		receiveWindowSize = receiveWindow.length;
-		RTPUtil.debug("receiveWindowSize:" + receiveWindowSize);
 		this.data = data;
 	}
 

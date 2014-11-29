@@ -24,6 +24,7 @@ public class RTPTestClient {
 			RTPUtil.debug("Connecting...");
 			boolean connection = clientRTPSocket.connect(destination);
 			RTPUtil.debug("Connection success:" + connection);
+			RTPUtil.debug(clientRTPSocket.toString());
 		}	
     }
 }

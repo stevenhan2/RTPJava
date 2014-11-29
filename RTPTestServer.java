@@ -31,6 +31,7 @@ public class RTPTestServer {
 			}
 
 			RTPUtil.debug("Accept returned true");
+			RTPUtil.debug(serverRTPSocket.toString());
 		}	
     }
 }
