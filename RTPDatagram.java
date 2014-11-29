@@ -175,8 +175,31 @@ public class RTPDatagram implements Comparable<RTPDatagram>{
 			return new Integer(this.sourcePort).compareTo(new Integer(datagram.sourcePort));
 		} else if (this.destPort != datagram.destPort) {
 			return new Integer(this.destPort).compareTo(new Integer(datagram.destPort));
-		} else {
+		} else if (this.sequenceNumber != datagram.sequenceNumber){
 			return new Long(this.sequenceNumber).compareTo(new Long(datagram.sequenceNumber));
+		} else {
+			return new Long(this.ackNumber).compareTo(new Long(datagram.ackNumber));
+		}
+	}
+
+	@Override public boolean equals(Object obj) {
+		if (!(obj instanceof RTPDatagram))
+			return false;
+		if (obj == this)
+			return true;
+
+		RTPDatagram datagram = (RTPDatagram) obj;
+
+		if (this.sourcePort != datagram.sourcePort){
+			return false;
+		} else if (this.destPort != datagram.destPort) {
+			return false;
+		} else if (this.sequenceNumber != datagram.sequenceNumber){
+			return false;
+		} else if (this.ackNumber != datagram.ackNumber) {
+			return false;
+		} else {
+			return true;
 		}
 	}
 }
