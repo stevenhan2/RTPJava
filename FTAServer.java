@@ -21,7 +21,7 @@ public class FTAServer{
 		InetSocketAddress UDPSocket = new InetSocketAddress(Integer.parseInt(args[2]));
 
 		Thread tcpThread = new Thread(new MyRunnable());
-		tcpThread.start();
+		//tcpThread.start();
 
 		boolean terminated = false;
 		while(terminated == false){
