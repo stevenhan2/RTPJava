@@ -9,7 +9,7 @@ public class RTPSocket {
 
 	// A connection is identified by combination of source host address, source port, destination host address, and destination port
 	public static final int DEFAULT_RECEIVE_WINDOW_BYTE_AMOUNT = 65535;
-	public static final int DEFAULT_WAIT_AMOUNT = 250;
+	public static final int DEFAULT_WAIT_AMOUNT = 500;
 
 	public State state;
 	public DatagramSocket datagramSocket;
