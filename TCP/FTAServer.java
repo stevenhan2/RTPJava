@@ -13,34 +13,39 @@ public class FTAServer {
 	  		boolean terminated = false;
 			System.out.println("server start listening at port " + serverPort + "... ... ...");
 
-			Runnable tcpThread = new MyRunnable(listenSocket);
-			tcpThread.start();
-		
-			while(!terminated) { 
-				Scanner scan = new Scanner(System.in);
-				System.out.println("terminate to close");
+			while(true){
+	        Socket clientSocket = listenSocket.accept(); 
+			Connection c = new Connection(clientSocket);	
+			//Runnable tcpThread = new MyRunnable(listenSocket);
+			//tcpThread.start();
 
-				String str1 = scan.nextLine();
-				if(str1.equals("terminate")){
-					terminated = true;
-					tcpThread.kill();
-				}
+			}	
+		
+			// while(!terminated) { 
+			// 	Scanner scan = new Scanner(System.in);
+			// 	System.out.println("terminate to close");
+
+			// 	String str1 = scan.nextLine();
+			// 	if(str1.equals("terminate")){
+			// 		terminated = true;
+			// 		tcpThread.kill();
+			// 	}
 				
-			} 
+			// } 
 	} 
 	catch(IOException e) {
 		System.out.println("Listen :"+e.getMessage());} 
   }
 
-  	private static class MyRunnable implements Runnable {
-  		private MyRunnable(ServerSocket listen){
-  			ServerSocket socket = listen;
-  		}
-    	public void run(){
-       		Socket clientSocket = socket.accept(); 
-			Connection c = new Connection(clientSocket); 
-    	}
-  	}
+  	// private static class MyRunnable implements Runnable {
+  	// 	private MyRunnable(ServerSocket listen){
+  	// 		ServerSocket socket = listen;
+  	// 	}
+   //  	public void run(){
+   //     		Socket clientSocket = socket.accept(); 
+			// Connection c = new Connection(clientSocket); 
+   //  	}
+  	// }
 }
 
 class Connection extends Thread { 
