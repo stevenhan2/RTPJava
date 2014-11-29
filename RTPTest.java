@@ -1,15 +1,31 @@
 import java.net.*;
 public class RTPTest {
 
+	public static int bindTestPort = 1248;
+
 	public static void testRTPSocket(){
 		RTPUtil.debug("Beginning RTPSocket tests");
 		// RTPSocket s1 = new RTPSocket();
 
-		RTPUtil.debug("Going to try to connect to 7080 from 8070");
-		RTPSocket s2 = new RTPSocket(new InetSocketAddress("localhost", 7080));
-		s2.bind(new InetSocketAddress("localhost", 8070));
-		RTPUtil.debug("Listening");
-		s2.listen();
+		InetSocketAddress localhostSource = null;
+		try {
+			bindTestPort = RTPSocket.getEphemeralPort(InetAddress.getLocalHost());
+			localhostSource = new InetSocketAddress("localhost", bindTestPort);
+		} catch (Exception e) {
+			RTPUtil.debug("Was unable to get ephemeral port and create source address");
+		}
+
+		if (localhostSource != null){
+			RTPUtil.debug("Going to try to connect to 7080 from " + bindTestPort);
+			RTPSocket s2 = new RTPSocket(new InetSocketAddress("localhost", 7080));
+			RTPUtil.debug("Trying to bind to localhost:" + bindTestPort);
+			boolean bindTry = s2.bind(localhostSource);
+			RTPUtil.debug("Bind success: " + bindTry);
+
+			RTPUtil.debug("Listening");
+			s2.listen();
+		}	
+
 	}
 
 	public static void testRTPUtilByteOperations(){

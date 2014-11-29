@@ -36,10 +36,10 @@ public class RTPSocket {
     	RTPUtil.debug("RTPSocket(" + address + ")");
     	if (address != null){
     		try {
-		    	datagramSocket = new DatagramSocket(address);
+		    	datagramSocket = new DatagramSocket(null);
 		    	datagramSocket.setSoTimeout(10000);
 	    	} catch (Exception e){
-	    		RTPUtil.debug(e.toString());
+	    		e.printStackTrace();
 	    	}
     	}
     	connectionAddress = address;
@@ -56,6 +56,7 @@ public class RTPSocket {
     		case CLOSED:
 				this.receiveSynRTPDatagramBuffer = new ArrayList<DatagramPacket>();
 				this.receiveDefaultRTPDatagramBuffer = new SetPriorityQueue<RTPDatagram>();
+				this.receiveAckRTPDatagramBuffer = new ArrayList<RTPDatagram>();
 
     			connectionAddress = address;
 
@@ -63,7 +64,7 @@ public class RTPSocket {
 		    		datagramSocket = new DatagramSocket(address);
 		    		this.bind(new InetSocketAddress(InetAddress.getLocalHost(),RTPSocket.getEphemeralPort(InetAddress.getLocalHost())));
 		    	} catch (Exception e){
-		    		RTPUtil.debug(e.toString());
+		    		e.printStackTrace();
 		    	}
 
 	    		this.receiveThread = new Thread(new ReceiveBufferLoop(this));
@@ -91,7 +92,7 @@ public class RTPSocket {
 			    		try {
 				    		sendSynThread.join();
 				    	} catch (Exception e){
-				    		RTPUtil.debug(e.toString());
+				    		e.printStackTrace();
 				    	}
 			    	// } else {
 			    		if (sendSynThread.ackReceived == false && stopAndWait == true){
@@ -115,14 +116,16 @@ public class RTPSocket {
     	return false;
     }
 
-    public void bind(InetSocketAddress bindAddress){
+    public boolean bind(InetSocketAddress bindAddress){
     	RTPUtil.debug("bind(" + bindAddress + ")");
     	this.bindAddress = bindAddress;
 
     	try {
 			datagramSocket.bind(bindAddress);
+			return true;
     	} catch (Exception e){
-    		RTPUtil.debug(e.toString());
+    		e.printStackTrace();
+    		return false;
     	}
     }
 
@@ -181,7 +184,7 @@ public class RTPSocket {
 				try {
 					sendThread.join();
 		    	} catch (Exception e){
-		    		RTPUtil.debug(e.toString());
+		    		e.printStackTrace();
 		    	}
 
 				// If never received any ACK, return false
@@ -235,7 +238,7 @@ public class RTPSocket {
 			DatagramPacket ackUDPDatagram = new DatagramPacket(ackRTPDatagramArray, ackRTPDatagramArray.length, connectionAddress);
 			datagramSocket.send(ackUDPDatagram);
 		} catch (Exception e){
-	    	RTPUtil.debug(e.toString());
+	    	e.printStackTrace();
 	    }
     }
 
@@ -263,6 +266,7 @@ public class RTPSocket {
 				state = State.LISTEN;
 
 				this.receiveSynRTPDatagramBuffer = new ArrayList<DatagramPacket>();
+				this.receiveAckRTPDatagramBuffer = new ArrayList<RTPDatagram>();
 				this.receiveDefaultRTPDatagramBuffer = new SetPriorityQueue<RTPDatagram>();
 
 				this.receiveThread = new Thread(new ReceiveBufferLoop(this));
@@ -347,7 +351,7 @@ public class RTPSocket {
 		    	} catch (SocketTimeoutException e){
 		    		continue;
 		    	} catch (Exception e){
-		    		RTPUtil.debug(e.toString());
+		    		e.printStackTrace();
 		    	}
 
 			}
@@ -398,12 +402,12 @@ public class RTPSocket {
 		    		counter++;
 		    	}
 		    } catch (Exception e){
-		    	RTPUtil.debug(e.toString());
+		    	e.printStackTrace();
 		    }
     	}
     }
 
-    private static int getEphemeralPort(InetAddress address) {
+    public static int getEphemeralPort(InetAddress address) {
     	int randomNum;
     	Random rand = new Random();
     	do {
