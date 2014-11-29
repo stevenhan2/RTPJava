@@ -34,13 +34,11 @@ public class RTPSocket {
 
     public RTPSocket(InetSocketAddress address){
     	RTPUtil.debug("RTPSocket(" + address + ")");
-    	if (address != null){
-    		try {
-		    	datagramSocket = new DatagramSocket(null);
-		    	datagramSocket.setSoTimeout(10000);
-	    	} catch (Exception e){
-	    		e.printStackTrace();
-	    	}
+		try {
+	    	datagramSocket = new DatagramSocket(null);
+	    	datagramSocket.setSoTimeout(10000);
+    	} catch (Exception e){
+    		e.printStackTrace();
     	}
     	connectionAddress = address;
 
@@ -61,7 +59,6 @@ public class RTPSocket {
     			connectionAddress = address;
 
     			try {
-		    		datagramSocket = new DatagramSocket(address);
 		    		this.bind(new InetSocketAddress(InetAddress.getLocalHost(),RTPSocket.getEphemeralPort(InetAddress.getLocalHost())));
 		    	} catch (Exception e){
 		    		e.printStackTrace();
@@ -74,7 +71,7 @@ public class RTPSocket {
 	    		// 1) Send SYN
 	    		// Set sequence number
 	    		Random rand = new Random();
-	    		this.sequenceNumber = rand.nextInt();
+	    		this.sequenceNumber = (long)(rand.nextInt(500000) + 100000);
 
 	    		// ===========================
 	    		// 2) ReceiveBufferLoop will accept a SYN, the thread will look for an ACK and retransmit if can't find it
@@ -85,17 +82,23 @@ public class RTPSocket {
 	    		long firstNanoTime = System.nanoTime();
 
 	    		while (!resolved){
+	    			RTPUtil.debug("resolving: starting");
 	    			if (state == State.CLOSED){
+	    				RTPUtil.debug("resolving: was closed, sending syn");
 		    			resolved = true;
 		    			sendSynThread = sendSyn(this.sequenceNumber);
 			    		state = State.SYNSENT;
 			    		try {
+			    			RTPUtil.debug("resolving: joining sendSynThread");
 				    		sendSynThread.join();
+				    		RTPUtil.debug("resolving: was able to join sendSynThread");
 				    	} catch (Exception e){
 				    		e.printStackTrace();
 				    	}
-			    	// } else {
+
+
 			    		if (sendSynThread.ackReceived == false && stopAndWait == true){
+			    			RTPUtil.debug("sendSynThread.ackReceived == false && stopAndWait == true");
 			    			state = State.CLOSED;
 			    			return false;
 			    		} else if (state == State.ESTABLISHED){
@@ -104,6 +107,7 @@ public class RTPSocket {
 			    		} else {
 			    			// timeout for waiting for SYN basically
 			    			if (System.nanoTime() - firstNanoTime > 5000000){
+			    				RTPUtil.debug("resolving: ran out of time");
 			    				state = State.CLOSED;
 			    			} else {
 			    				resolved = false;
@@ -142,7 +146,7 @@ public class RTPSocket {
 
 		rtpDatagram.sequenceNumber = this.sequenceNumber;
 
-    	Thread sendThread = new SendThread(this, rtpDatagram, 5, 100);
+    	Thread sendThread = new SendThread(this, rtpDatagram, 5, 50);
     	sendThread.start();
     }
 
@@ -152,9 +156,11 @@ public class RTPSocket {
     }
 
     public boolean accept(){
-    	RTPUtil.debug("accept");
+    	// RTPUtil.debug("accept");
     	if (state == State.LISTEN){
+    		RTPUtil.debug("Accept: and state was listen");
     		if (receiveSynRTPDatagramBuffer.size() > 0){
+    			RTPUtil.debug("Something was accepted!!! Cause the Syn Buffer was longer than 0!");
     			DatagramPacket examineUDPDatagram = receiveSynRTPDatagramBuffer.remove(0);
     			RTPDatagram examineRTPDatagram = new RTPDatagram(examineUDPDatagram.getData());
 				state = State.SYNRCVD;
@@ -163,20 +169,20 @@ public class RTPSocket {
 				RTPDatagram synAckRTPDatagram = new RTPDatagram(
 					bindAddress.getPort(),
 					connectionAddress.getPort(),
-					RTPDatagram.ACK,
+					RTPDatagram.ACK + RTPDatagram.SYN,
 					receiveWindow,
 					new byte[0]
 				);
 
 				Random rand = new Random();
-	    		this.sequenceNumber = rand.nextInt();
+	    		this.sequenceNumber = (long)(rand.nextInt(500000) + 100000);
 	    		synAckRTPDatagram.sequenceNumber = this.sequenceNumber;
 	    		this.ackNumber = examineRTPDatagram.sequenceNumber + 1;
 
 				synAckRTPDatagram.sequenceNumber = this.sequenceNumber;
 				synAckRTPDatagram.ackNumber = this.ackNumber;
 
-				Thread sendThread = new SendThread(this, synAckRTPDatagram, 5, 100);
+				Thread sendThread = new SendThread(this, synAckRTPDatagram, 5, 500);
 		    	sendThread.start();
 
 				// Pack and send
@@ -254,7 +260,7 @@ public class RTPSocket {
 
 		synRTPDatagram.sequenceNumber = number;
 
-		SendThread newThread = new SendThread(this, synRTPDatagram, 5, 100);
+		SendThread newThread = new SendThread(this, synRTPDatagram, 5, 50);
 		newThread.start();
 		return newThread;
     }
@@ -263,6 +269,7 @@ public class RTPSocket {
     	RTPUtil.debug("listen()");
     	switch (state) {
     		case CLOSED:
+	    		RTPUtil.debug("State set to LISTEN");
 				state = State.LISTEN;
 
 				this.receiveSynRTPDatagramBuffer = new ArrayList<DatagramPacket>();
@@ -305,46 +312,49 @@ public class RTPSocket {
 
 		    		RTPDatagram examineRTPDatagram = new RTPDatagram(examineUDPDatagram.getData());
 
+		    		RTPUtil.debug("ReceiveBufferLoop: 0. received from (" + examineUDPDatagram.getAddress() + ", " + examineUDPDatagram.getPort());
+		    		RTPUtil.debug("ReceiveBufferLoop: 1. Received in ReceiveBufferLoop");
 		    		if ((examineRTPDatagram.flags & RTPDatagram.SYN) > 0){
+		    			RTPUtil.debug("ReceiveBufferLoop: 2. It was a SYN");
 		    			if (state == State.SYNSENT){
 		    				if (examineUDPDatagram.getPort() == connectionAddress.getPort() &&
 		    					examineUDPDatagram.getAddress().equals(connectionAddress.getAddress())){
 		    					ackNumber = examineRTPDatagram.sequenceNumber + 1l;
 		    					sendAck(ackNumber);
 		    					state = State.ESTABLISHED;
+		    					RTPUtil.debug("ReceiveBufferLoop: 3. State = Estabished");
 		    				}
 		    			}
+
+		    			RTPUtil.debug("ReceiveBufferLoop: 3.33 About to see if should put anything in Syn Buffer");
 		    			if (!receiveSynRTPDatagramBuffer.contains(examineUDPDatagram)){
 		    				receiveSynRTPDatagramBuffer.add(examineUDPDatagram);
+		    				RTPUtil.debug("ReceiveBufferLoop: 3.66 Something added in synbuffer It's size is now " + receiveSynRTPDatagramBuffer.size());
 		    			}
 		    		}
 
 		    		if ((examineRTPDatagram.flags & RTPDatagram.ACK) > 0){
-		    			if (state == State.ESTABLISHED &&
-		    				examineUDPDatagram.getPort() == connectionAddress.getPort() &&
+		    			RTPUtil.debug("ReceiveBufferLoop: 4. It was an ACK");
+		    			if (examineUDPDatagram.getPort() == connectionAddress.getPort() &&
 		    				examineUDPDatagram.getAddress().equals(connectionAddress.getAddress()))
 		    			{
+	    				// if (state == State.ESTABLISHED){
 			    			if (stopAndWait && examineRTPDatagram.ackNumber == sequenceNumber + 1){
-			    				stopAndWait = false;
-			    				sequenceNumber += 1;
-			    			} else {
-			    				receiveAckRTPDatagramBuffer.add(examineRTPDatagram);
+			    				// stopAndWait = false;
+			    				// sequenceNumber += 1;
+			    				if (state == State.SYNSENT){
+			    					state = State.ESTABLISHED;
+			    				}
 			    			}
-
-				    		// else {if 
-					    		// receiveDefaultRTPDatagramBuffer.add(examineRTPDatagram);
-					    		// receiveAckRTPDatagramBuffer.add(examineRTPDatagram);
-				    		// }
-		    			// } 
-		    			// else {
-	    					// receiveDefaultRTPDatagramBuffer.add(examineRTPDatagram);
-	    					// receiveAckRTPDatagramBuffer.add(examineRTPDatagram);
+			    			// } else {
+			    				receiveAckRTPDatagramBuffer.add(examineRTPDatagram);
+			    			// }
 		    			}
 		    		}
 
 		    		// We've already received this and acked it, so we'll ack it again
-		    		if (examineRTPDatagram.sequenceNumber < ackNumber){
-		    			sendAck(examineRTPDatagram.sequenceNumber + 1);
+		    		if (state == State.Established && examineRTPDatagram.sequenceNumber < ackNumber){
+		    			sendAck(examineRTPDatagram.sequenceNumber + 1L);
 		    		} else {
 			    		receiveDefaultRTPDatagramBuffer.add(examineRTPDatagram);
 		    		}
@@ -378,10 +388,15 @@ public class RTPSocket {
     		this.rtpSocket = socket;
     		this.dataToSend = dataToSend;
 	   		this.rtpDatagram = rtpDatagram;
+	   		this.waitTime = waitTime;
+
+	   		RTPUtil.debug("SendThread created for:");
+	   		RTPUtil.debug(rtpDatagram.toString());
     	}
 
     	public void run(){
     		int counter = 0;
+    		RTPUtil.debug("SendThread: running");
     		try {
 				byte[] datagramArray = this.rtpDatagram.getByteArray();
 				DatagramPacket udpDatagram = new DatagramPacket(datagramArray, datagramArray.length, rtpSocket.connectionAddress);
@@ -393,11 +408,13 @@ public class RTPSocket {
 		    			if (tmp.flags * RTPDatagram.ACK > 0 && tmp.ackNumber == rtpSocket.sequenceNumber + 1){
 							this.rtpSocket.sequenceNumber += 1;
 							this.rtpSocket.stopAndWait = false;
+							this.ackReceived = true;
 							this.rtpSocket.receiveAckRTPDatagramBuffer.remove(tmp);
 						}
 		    		}
 
-		    		Thread.sleep(waitTime);
+		    		Thread.currentThread().sleep(waitTime);
+		    		RTPUtil.debug("SendThread: sleeping");
 
 		    		counter++;
 		    	}

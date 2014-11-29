@@ -52,6 +52,7 @@ public class RTPDatagram implements Comparable<RTPDatagram>{
 
 	public RTPDatagram(byte[] rawData){
 		RTPUtil.debug("Creating RTPDatagram from raw bytes");
+		RTPUtil.debug("-----------------------------------------------------------------------------");
 		int rawDataPointer = 0;
 
 		this.sourcePort = ((((int)rawData[rawDataPointer]) << 8)  + ((int)rawData[rawDataPointer + 1])) & 0x0000FFFF;
@@ -103,6 +104,7 @@ public class RTPDatagram implements Comparable<RTPDatagram>{
 		for (int i = 0; i < data.length; i++){
 			data[i] = rawData[rawDataPointer + i];
 		}
+		RTPUtil.debug("-----------------------------------------------------------------------------");
 	}
 
 	public ByteArrayOutputStream getHeaderByteArrayNoChecksum(){
@@ -154,17 +156,18 @@ public class RTPDatagram implements Comparable<RTPDatagram>{
     }
 
     public String toString(){
-    	String returnString = "";
+    	String returnString = "--------------------Printing RTPDatagram-----------------------";
 
     	returnString += 
-
-    	"Source port:" + sourcePort +
+    	"\nSource port:" + sourcePort +
     	"\nDestination port:" + destPort +
     	"\nSequence number:" + sequenceNumber +
-    	"\nack number:" + ackNumber +
+    	"\nAck number:" + ackNumber +
+    	"\nflags:" + flags +
     	"\nData:" + new String(data);
 
 
+    	returnString += "\n----------------------------------------------------------------";
     	return returnString;
     }
 
