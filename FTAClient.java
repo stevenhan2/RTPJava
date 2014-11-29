@@ -1,5 +1,8 @@
 import java.util.*;
 import java.net.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 public class FTAClient{
 
 // 	X: the port number at which the fta-client’s UDP socket should bind to (even number).
@@ -61,11 +64,21 @@ public class FTAClient{
 
   	public static void get(String fileName){
   		System.out.println("getting file " + fileName);
+  		try{
+  			System.out.println(readFile(fileName));
+  		}catch (Exception E){
+  			
+  		}
 
   	}
 
   	public static void post(String fileName){
   		System.out.println("posting file " + fileName);
+  		try{
+  			System.out.println(readFile(fileName));
+  		}catch (Exception E){
+  			
+  		}
   	}
 
  	public static void window(int windowSize){
@@ -82,5 +95,23 @@ public class FTAClient{
        	System.out.println("Hello World!");
     	}
   	}
+
+
+  	public static String readFile(String fileName) throws IOException {
+    	BufferedReader br = new BufferedReader(new FileReader(fileName));
+    	try {
+       		StringBuilder sb = new StringBuilder();
+        	String line = br.readLine();
+
+        	while (line != null) {
+            	sb.append(line);
+            	sb.append("\n");
+            	line = br.readLine();
+        	}
+        	return sb.toString();
+    	} finally {
+        	br.close();
+    	}
+	}
 
 }
