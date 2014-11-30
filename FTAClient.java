@@ -23,7 +23,7 @@ public class FTAClient {
 		// Socket s = null; 
 
 		boolean terminated = false;
-		while(terminated == false){
+		while(!terminated){
 			Scanner scan = new Scanner(System.in);
 			System.out.println("Options: connect-get, disconnect");
 			String str1 = scan.nextLine();
@@ -101,6 +101,8 @@ public class FTAClient {
 				// }
   			}else if(str1.equals("disconnect")){
   				terminated = true;
+  			}else{
+  				System.out.println("not a valid command");
   			}
   		}
   	}
