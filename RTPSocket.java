@@ -65,7 +65,9 @@ public class RTPSocket {
     			this.stopAndWait = false;
 
     			try {
-		    		this.bind(new InetSocketAddress("0.0.0.0",RTPSocket.getEphemeralPort(InetAddress.getLocalHost())));
+    				if (this.bindAddress == null){
+			    		this.bind(new InetSocketAddress("0.0.0.0",RTPSocket.getEphemeralPort(InetAddress.getLocalHost())));
+		    		}
 		    	} catch (Exception e){
 		    		e.printStackTrace();
 		    	}
