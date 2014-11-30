@@ -10,8 +10,8 @@ public class FTAClient {
 		System.out.println("Beginning RTPTestClient");
 		// RTPSocket s1 = new RTPSocket();
 
-		int serverPort = Integer.parseInt(args[0]);
-		int bindPort = Integer.parseInt(args[2]);
+		int serverPort = Integer.parseInt(args[2]);
+		int bindPort = Integer.parseInt(args[0]);
 
 		byte[] helloWorldData = "Hello World!".getBytes();
 		byte[] foobarData = "FOObar World!".getBytes();
@@ -30,7 +30,6 @@ public class FTAClient {
 			if(str1.equals("connect-get")){
 
 				try {
-					bindPort = RTPSocket.getEphemeralPort(InetAddress.getLocalHost());
 					bindsource = new InetSocketAddress("0.0.0.0" , bindPort);
 					destination = new InetSocketAddress("localhost", serverPort);
 				} catch (Exception e) {

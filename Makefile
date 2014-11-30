@@ -1,5 +1,6 @@
 all:
-	javac -g RTP.java
+	javac FTAServer.java
+	javac FTAClient.java
 
 clean:
 	rm *.class
@@ -11,3 +12,4 @@ reset:
 test:
 	javac -g RTPTestServer.java
 	javac -g RTPTestClient.java
+
