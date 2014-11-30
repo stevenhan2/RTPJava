@@ -8,7 +8,7 @@ import java.util.*;
 public class FTAServer { 
   	public static void main (String args[]){
   		System.out.println("Beginning FTAServer");
-		int bindport = Integer.parseInt(args[2]);
+		int bindport = Integer.parseInt(args[0]);
 		InetSocketAddress bindsource = null; 
 		
 		try{ 
