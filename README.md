@@ -8,12 +8,29 @@ RTPTestClient defaults to binding to port 4000 as a convenience for NetEmu.
 3. on one terminal run java RTPTestServer 4001 (or any other port)
 4. on one terminal run java RTPTestClient 8000 (or any other port, but they have to be the same)
 
-Instructions to run FTAClient and FTAServer
+*Instructions to run FTAClient and FTAServer*
 
-1. on the terminal run javac FTAServer.java 8000
-2. on the terminal run java FTAServer 8000 (or any other port) localhost
-3. on a different terminal run javac FTAClient.java
-4. on the same terminal as number 3 run java FTAClient 8000 localhost
+1. make
+2. NetEmu 8000
+3. java FTAServer 8000 (or any other port) localhost 8000
+4. java FTAClient 8000 localhost
 5. you will be provided with 2 options in FTAClient: connect-get and close. 
 	connect-get connects to the server and gets the file from the server
 	close exists the program.
+
+*Implemented:*
+(x)	connect-get
+()	get 					RTP is bidirectional, but I ran out of time
+()	connect 				RTP is bidirectional, but I ran out of time
+(x)	post
+()	terminate				No time to implement, but would be part of state system with FIN flag and closing states similar to TCP
+()	window 					Did not implement pipelining
+()	disconnect 				No time to implement, but would be part of state system with FIN flag and closing
+
+
+*I was able to send a file using:*
+0. make
+1. python NetEmu.py 8000 -l 10 -c 10 -d 10 -D 100 -r 25
+2. java FTAServer 5001 localhost 8000
+3. java FTAClient 5000 localhost 8000
+4. connect-get /Users/shan/file.txt
