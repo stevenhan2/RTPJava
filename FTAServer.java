@@ -45,7 +45,7 @@ public class FTAServer {
 			if (command.equalsIgnoreCase("connect-get")){
 				byte[] file = FTAServer.readBytes(parts[1]);
 				serverRTPSocket.send(file);
-			} else if command.equalsIgnoreCase("post"){
+			} else if(command.equalsIgnoreCase("post")){
 
 				String[] fileParts = (parts[1]).split("/");
 				String filename = fileParts[fileParts.length - 1];

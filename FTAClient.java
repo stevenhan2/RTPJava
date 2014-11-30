@@ -31,7 +31,7 @@ public class FTAClient {
 			System.out.println("Options: connect-get, disconnect");
 			String inputString = scan.nextLine();
 			String[] parts = inputString.split(" ");
-			String operation = parts[0]
+			String operation = parts[0];
 
 
 
@@ -57,7 +57,7 @@ public class FTAClient {
 					}
 				}	
 
-  			} else if (operation.equalsIgnoreCase("post"){
+  			} else if (operation.equalsIgnoreCase("post")){
   				if (bindsource != null){
 					System.out.println("Going to try to connect to " + serverPort + " from " + bindPort);
 					RTPSocket clientRTPSocket = new RTPSocket(new InetSocketAddress("localhost", serverPort));
