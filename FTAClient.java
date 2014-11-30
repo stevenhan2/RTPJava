@@ -10,18 +10,20 @@ public class FTAClient{
 // A: the IP address of NetEmu
 // P: the UDP port number of NetEmu
   	public static void main(String args[]){
+  		Socket s = null; 
 
-		InetSocketAddress clientSocket = new InetSocketAddress(Integer.parseInt(args[0]));
 
-		try{
-		InetAddress ip = InetAddress.getByName(args[1]);
-		}catch (UnknownHostException e) {
-	        e.printStackTrace();
-		}
-		InetSocketAddress UDPSocket = new InetSocketAddress(Integer.parseInt(args[2]));
+		// InetSocketAddress clientSocket = new InetSocketAddress(Integer.parseInt(args[0]));
+
+		// try{
+		// InetAddress ip = InetAddress.getByName(args[1]);
+		// }catch (UnknownHostException e) {
+	 //        e.printStackTrace();
+		// }
+		// InetSocketAddress UDPSocket = new InetSocketAddress(Integer.parseInt(args[2]));
 
 		Thread tcpThread = new Thread(new MyRunnable());
-   		tcpThread.start();
+   		tcpThread.run();
 
    		boolean terminated = false;
 		while(terminated == false){
@@ -35,7 +37,34 @@ public class FTAClient{
 			// }else 
 
 			if(str1.equals("connect")){
-				connect();
+				//connect(args[0], args[1]);
+
+  				try{
+		  			int serverPort = Integer.parseInt(args[0]);
+		  			String ip = args[1];
+
+		 			//  	if(args.length > 1){
+		 			//  		ip = args[1];
+		 			//  	}else{
+					// 	ip = "localhost";
+					// }
+					
+					s = new Socket(ip, serverPort); 
+					System.out.println("connected!");
+				}catch(UnknownHostException e){ 
+					System.out.println("Sock:"+e.getMessage());}
+				catch (IOException e){
+					System.out.println("IO:"+e.getMessage());} 
+				finally {
+					if(s!=null) 
+						try {s.close();
+						} 
+				catch (IOException e) {/*close failed*/}
+				}		
+
+
+
+
 			}else if(str1.length() > 3 && str1.substring(0,3).equals("get")){
 				get(str1.substring(4));
 			}else if(str1.length() > 4 && str1.substring(0,4).equals("post")){
@@ -58,7 +87,30 @@ public class FTAClient{
   	// 	//code for connectGet
   	// }
 
-  	public static void connect(){
+  	public static void connect(String port, String ipNet){
+
+  // 		try{
+		//   	int serverPort = Integer.parseInt(port);
+		//   	String ip = ipNet;
+
+		//  	//  	if(args.length > 1){
+		//  	//  		ip = args[1];
+		//  	//  	}else{
+		// 	// 	ip = "localhost";
+		// 	// }
+			  
+		// 	s = new Socket(ip, serverPort); 
+		// 	System.out.println("connected!");
+		// }catch(UnknownHostException e){ 
+		// 	System.out.println("Sock:"+e.getMessage());}
+		// catch (IOException e){
+		// 	System.out.println("IO:"+e.getMessage());} 
+		// finally {
+		// 	if(s!=null) 
+		// 		try {s.close();
+		// 		} 
+		// catch (IOException e) {/*close failed*/}
+		// }
 
   	}
 
@@ -73,12 +125,32 @@ public class FTAClient{
   	}
 
   	public static void post(String fileName){
-  		System.out.println("posting file " + fileName);
-  		try{
-  			System.out.println(readFile(fileName));
-  		}catch (Exception E){
+
+  		// System.out.println("posting file " + fileName);
+  		// try{
+  		// 	String data = readFile("example.txt");
+  		// 	DataInputStream input = new DataInputStream( s.getInputStream()); 
+		  // DataOutputStream output = new DataOutputStream( s.getOutputStream()); 
+		  
+			 //  //Step 1 send length
+			 //  System.out.println("Length"+ data.length());
+			 //  output.writeInt(data.length());
+			 //  //Step 2 send length
+			 //  System.out.println("Writing.......");
+			 //  output.writeBytes(data); // UTF is a string encoding
+			  
+			 //  //Step 1 read length
+			 //  int nb = input.readInt();
+			 //  byte[] digit = new byte[nb];
+			 //  //Step 2 read byte
+			 //  for(int i = 0; i < nb; i++)
+				// digit[i] = input.readByte();
+		  
+			 //  String st = new String(digit);
+		  // System.out.println("Received: "+ st); 
+  		// }catch (Exception E){
   			
-  		}
+  		// }
   	}
 
  	public static void window(int windowSize){
@@ -92,7 +164,8 @@ public class FTAClient{
 
   	public static class MyRunnable implements Runnable {
     	public void run(){
-       	System.out.println("Hello World!");
+    		System.out.println("Hello World!");
+
     	}
   	}
 
