@@ -331,8 +331,9 @@ public class RTPSocket {
 		    			RTPUtil.debug("ReceiveBufferThread: Checksum was correct.");
 		    		}
 
-		    		RTPUtil.debug("ReceiveBufferThread: 0. received from (" + examineUDPDatagram.getAddress() + ", " + examineUDPDatagram.getPort());
+		    		// RTPUtil.debug("ReceiveBufferThread: 0. received from (" + examineUDPDatagram.getAddress() + ", " + examineUDPDatagram.getPort());
 		    		RTPUtil.debug("ReceiveBufferThread: 1. Received in ReceiveBufferThread");
+		    		RTPUtil.debug("ReceiveBufferThread: 1.5 " + examineRTPDatagram.toString());
 
 		    		if ((examineRTPDatagram.flags & RTPDatagram.SYN) > 0){
 		    			RTPUtil.debug("ReceiveBufferThread: 2. It was a SYN");
@@ -385,7 +386,7 @@ public class RTPSocket {
 							// 		RTPUtil.debug(RTPSocket.this.toString());
 
 			    				// expectedAckRTPDatagram = examineRTPDatagram;
-			    				if (state == RTPSocket.State.SYNSENT){
+			    				if (state == RTPSocket.State.SYNRCVD){
 			    					state = RTPSocket.State.ESTABLISHED;
 			    				}
 
@@ -398,9 +399,11 @@ public class RTPSocket {
 
 		    		// We've already received this and acked it, so we'll ack it again
 		    		if (state == RTPSocket.State.ESTABLISHED && examineRTPDatagram.flags == 0){
-		    			if (examineRTPDatagram.sequenceNumber < ackNumber){
-			    			sendAck(examineRTPDatagram.sequenceNumber + 1L);
-			    		} else if (examineRTPDatagram.sequenceNumber == ackNumber) {
+		    			// if (examineRTPDatagram.sequenceNumber < ackNumber){
+		    			// 	RTPUtil.debug("this should have been acked already");
+			    		// 	sendAck(examineRTPDatagram.sequenceNumber + 1L);
+			    		// } else 
+			    		if (examineRTPDatagram.sequenceNumber == ackNumber) {
 			    			receiveDataDatagram = examineRTPDatagram;
 			    			synchronized(this){
 			    				notify();

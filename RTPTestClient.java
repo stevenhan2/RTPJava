@@ -17,7 +17,7 @@ public class RTPTestClient {
 			bindsource = new InetSocketAddress("0.0.0.0" , bindPort);
 			destination = new InetSocketAddress("localhost", serverPort);
 		} catch (Exception e) {
-			System.out.println("Was unable to get ephemeral serverPort and create source address");
+			System.out.println("Was unable to get ephemeral port and create source address");
 		}
 
 		if (bindsource != null){
@@ -32,7 +32,12 @@ public class RTPTestClient {
 			if (connection){
 				System.out.println("Trying to send \"Hello World!\"");
 				clientRTPSocket.send(helloWorldData);
+				System.out.println("Trying to send \"FOObar World!\"");
 				clientRTPSocket.send(foobarData);
+
+				String toasty = new String(clientRTPSocket.receive());
+				System.out.println("toasty:" + toasty);
+
 			}
 		}	
     }

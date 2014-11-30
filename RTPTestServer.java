@@ -7,6 +7,8 @@ public class RTPTestServer {
 		int bindport = Integer.parseInt(args[0]);
 		InetSocketAddress bindsource = null;
 
+		byte[] toasty = "Toasty! Toasty! Toasty! Mannnn".getBytes();
+
 		try {
 			bindsource = new InetSocketAddress("0.0.0.0", bindport);
 		} catch (Exception e) {
@@ -38,6 +40,9 @@ public class RTPTestServer {
 
 			String foobarString = new String(serverRTPSocket.receive());
 			System.out.println("foobarString:" + foobarString);
+
+			System.out.println("Trying to send \"Toasty! Toasty! Toasty! Mannnn\"");
+			serverRTPSocket.send(toasty);
 
 			System.out.println(serverRTPSocket.toString());
 		}	
