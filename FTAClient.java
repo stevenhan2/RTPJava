@@ -11,7 +11,7 @@ public class FTAClient {
 		// RTPSocket s1 = new RTPSocket();
 
 		int serverPort = Integer.parseInt(args[0]);
-		int bindPort = 0;
+		int bindPort = Integer.parseInt(args[2]);
 
 		byte[] helloWorldData = "Hello World!".getBytes();
 		byte[] foobarData = "FOObar World!".getBytes();
@@ -40,6 +40,8 @@ public class FTAClient {
 				if (bindsource != null){
 					System.out.println("Going to try to connect to " + serverPort + " from " + bindPort);
 					RTPSocket clientRTPSocket = new RTPSocket(new InetSocketAddress("localhost", serverPort));
+//
+					boolean bindTry = clientRTPSocket.bind(bindsource);
 
 					System.out.println("Connecting...");
 					boolean connection = clientRTPSocket.connect(destination);
