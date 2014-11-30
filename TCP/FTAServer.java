@@ -6,54 +6,30 @@ import java.util.*;
 
 
 public class FTAServer { 
-  public static void main (String args[]){ 
-	try{ 
+  	public static void main (String args[]){ 
+		try{ 
 			int serverPort = Integer.parseInt(args[0]);
 			ServerSocket listenSocket = new ServerSocket(serverPort); 
-	  		boolean terminated = false;
+			boolean terminated = false;
 			System.out.println("server start listening at port " + serverPort + "... ... ...");
 
 			while(true){
-	        Socket clientSocket = listenSocket.accept(); 
-			Connection c = new Connection(clientSocket);	
-			//Runnable tcpThread = new MyRunnable(listenSocket);
-			//tcpThread.start();
-
+				Socket clientSocket = listenSocket.accept(); 
+				ConnectionThread c = new ConnectionThread(clientSocket);	
 			}	
-		
-			// while(!terminated) { 
-			// 	Scanner scan = new Scanner(System.in);
-			// 	System.out.println("terminate to close");
+		} catch(IOException e) {
+			System.out.println("Listen :"+e.getMessage());
+		} 
+	}
 
-			// 	String str1 = scan.nextLine();
-			// 	if(str1.equals("terminate")){
-			// 		terminated = true;
-			// 		tcpThread.kill();
-			// 	}
-				
-			// } 
-	} 
-	catch(IOException e) {
-		System.out.println("Listen :"+e.getMessage());} 
-  }
-
-  	// private static class MyRunnable implements Runnable {
-  	// 	private MyRunnable(ServerSocket listen){
-  	// 		ServerSocket socket = listen;
-  	// 	}
-   //  	public void run(){
-   //     		Socket clientSocket = socket.accept(); 
-			// Connection c = new Connection(clientSocket); 
-   //  	}
-  	// }
 }
 
-class Connection extends Thread { 
+class ConnectionThread extends Thread { 
 	DataInputStream input; 
 	DataOutputStream output; 
 	Socket clientSocket; 
 	
-	public Connection (Socket aClientSocket) { 
+	public ConnectionThread (Socket aClientSocket) { 
 		try { 
 					clientSocket = aClientSocket; 
 					input = new DataInputStream( clientSocket.getInputStream()); 
@@ -61,9 +37,9 @@ class Connection extends Thread {
 					this.start(); 
 		} 
 			catch(IOException e) {
-			System.out.println("Connection:"+e.getMessage());
+			System.out.println("ConnectionThread:"+e.getMessage());
 			} 
-	  } 
+	 	 } 
 
 	  public void run() { 
 		try { // an echo server 

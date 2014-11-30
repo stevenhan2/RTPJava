@@ -6,7 +6,8 @@ import java.util.*;
 
 
 public class FTAClient { 
-	public static void main (String args[]) {// arguments supply message and hostname of destination  
+	public static void main (String args[]) {
+	// arguments supply message and hostname of destination  
 		Socket s = null; 
 
 		boolean terminated = false;
@@ -19,28 +20,29 @@ public class FTAClient {
 		  			int serverPort = Integer.parseInt(args[0]);
 		  			String ip = args[1];
 
-		 //  	if(args.length > 1){
-		 //  		ip = args[1];
-		 //  	}else{
-			// 	ip = "localhost";
-			// }
-					String data = readFile("example.txt"); //"Hello, How are you?"; 
+					String data = readFile("example.txt"); 
+					//"Hello, How are you?"; 
 			  
 		 			s = new Socket(ip, serverPort); 
 		  			DataInputStream input = new DataInputStream( s.getInputStream()); 
 		  			DataOutputStream output = new DataOutputStream( s.getOutputStream()); 
 		  
-			  //Step 1 send length
+					
+					//Step 1 send length
 			  		System.out.println("Length"+ data.length());
 			  		output.writeInt(data.length());
-			  //Step 2 send length
+					
+					//Step 2 send length
 			  		System.out.println("Writing.......");
-			  		output.writeBytes(data); // UTF is a string encoding
+			  		output.writeBytes(data); 
+					// UTF is a string encoding
 			  
-			  //Step 1 read length
+					
+					//Step 1 read length
 			  		int nb = input.readInt();
 			  		byte[] digit = new byte[nb];
-			  //Step 2 read byte
+					
+					//Step 2 read byte
 			  		for(int i = 0; i < nb; i++)
 					digit[i] = input.readByte();
 		  
