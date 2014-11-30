@@ -7,8 +7,20 @@ import java.util.*;
 
 public class FTAClient { 
 	public static void main (String args[]) {
-	// arguments supply message and hostname of destination  
-		Socket s = null; 
+		System.out.println("Beginning RTPTestClient");
+		// RTPSocket s1 = new RTPSocket();
+
+		int serverPort = Integer.parseInt(args[0]);
+		int bindPort = 0;
+
+		byte[] helloWorldData = "Hello World!".getBytes();
+		byte[] foobarData = "FOObar World!".getBytes();
+
+		InetSocketAddress bindsource = null;
+		InetSocketAddress destination = null; 
+
+
+		// Socket s = null; 
 
 		boolean terminated = false;
 		while(terminated == false){
@@ -16,51 +28,75 @@ public class FTAClient {
 			System.out.println("Options: connect-get, disconnect");
 			String str1 = scan.nextLine();
 			if(str1.equals("connect-get")){
-				try{ 
-		  			int serverPort = Integer.parseInt(args[0]);
-		  			String ip = args[1];
 
-					String data = readFile("example.txt"); 
-					//"Hello, How are you?"; 
+				try {
+					bindPort = RTPSocket.getEphemeralPort(InetAddress.getLocalHost());
+					bindsource = new InetSocketAddress("0.0.0.0" , bindPort);
+					destination = new InetSocketAddress("localhost", serverPort);
+				} catch (Exception e) {
+					System.out.println("Was unable to get ephemeral serverPort and create source address");
+				}
+
+				if (bindsource != null){
+					System.out.println("Going to try to connect to " + serverPort + " from " + bindPort);
+					RTPSocket clientRTPSocket = new RTPSocket(new InetSocketAddress("localhost", serverPort));
+
+					System.out.println("Connecting...");
+					boolean connection = clientRTPSocket.connect(destination);
+					System.out.println("Connection success:" + connection);
+					System.out.println(clientRTPSocket.toString());
+
+					if (connection){
+						System.out.println("Trying to send \"Hello World!\"");
+						clientRTPSocket.send(helloWorldData);
+						clientRTPSocket.send(foobarData);
+					}
+				}	
+				// try{ 
+		  // 			int serverPort = Integer.parseInt(args[0]);
+		  // 			String ip = args[1];
+
+				// 	String data = readFile("example.txt"); 
+				// 	//"Hello, How are you?"; 
 			  
-		 			s = new Socket(ip, serverPort); 
-		  			DataInputStream input = new DataInputStream( s.getInputStream()); 
-		  			DataOutputStream output = new DataOutputStream( s.getOutputStream()); 
+		 	// 		s = new Socket(ip, serverPort); 
+		  // 			DataInputStream input = new DataInputStream( s.getInputStream()); 
+		  // 			DataOutputStream output = new DataOutputStream( s.getOutputStream()); 
 		  
 					
-					//Step 1 send length
-			  		System.out.println("Length"+ data.length());
-			  		output.writeInt(data.length());
+				// 	//Step 1 send length
+			 //  		System.out.println("Length"+ data.length());
+			 //  		output.writeInt(data.length());
 					
-					//Step 2 send length
-			  		System.out.println("Writing.......");
-			  		output.writeBytes(data); 
-					// UTF is a string encoding
+				// 	//Step 2 send length
+			 //  		System.out.println("Writing.......");
+			 //  		output.writeBytes(data); 
+				// 	// UTF is a string encoding
 			  
 					
-					//Step 1 read length
-			  		int nb = input.readInt();
-			  		byte[] digit = new byte[nb];
+				// 	//Step 1 read length
+			 //  		int nb = input.readInt();
+			 //  		byte[] digit = new byte[nb];
 					
-					//Step 2 read byte
-			  		for(int i = 0; i < nb; i++)
-					digit[i] = input.readByte();
+				// 	//Step 2 read byte
+			 //  		for(int i = 0; i < nb; i++)
+				// 	digit[i] = input.readByte();
 		  
-			  		String st = new String(digit);
-		  			System.out.println("Received: "+ st); 
-				}
-				catch (UnknownHostException e){ 
-					System.out.println("Sock:"+e.getMessage());}
-				catch (EOFException e){
-					System.out.println("EOF:"+e.getMessage()); }
-				catch (IOException e){
-					System.out.println("IO:"+e.getMessage());} 
-				finally {
-			  		if(s!=null) 
-				  		try {s.close();
-				  	} 
-				  	catch (IOException e) {/*close failed*/}
-				}
+			 //  		String st = new String(digit);
+		  // 			System.out.println("Received: "+ st); 
+				// }
+				// catch (UnknownHostException e){ 
+				// 	System.out.println("Sock:"+e.getMessage());}
+				// catch (EOFException e){
+				// 	System.out.println("EOF:"+e.getMessage()); }
+				// catch (IOException e){
+				// 	System.out.println("IO:"+e.getMessage());} 
+				// finally {
+			 //  		if(s!=null) 
+				//   		try {s.close();
+				//   	} 
+				//   	catch (IOException e) {/*close failed*/}
+				// }
   			}else if(str1.equals("disconnect")){
   				terminated = true;
   			}

@@ -10,7 +10,7 @@ public class RTPTestServer {
 		byte[] toasty = "Toasty! Toasty! Toasty! Mannnn".getBytes();
 
 		try {
-			bindsource = new InetSocketAddress("0.0.0.0", bindport);
+			bindsource = new InetSocketAddress("localhost", bindport);
 		} catch (Exception e) {
 			System.out.println("Was unable to get ephemeral port and create source address");
 		}
