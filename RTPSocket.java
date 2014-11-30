@@ -9,8 +9,8 @@ public class RTPSocket {
 
 	// A connection is identified by combination of source host address, source port, destination host address, and destination port
 	public static final int DEFAULT_RECEIVE_WINDOW_BYTE_AMOUNT = 65535;
-	public static final int DEFAULT_WAIT_AMOUNT = 100;
-	public static final int DEFAULT_RETRY_AMOUNT = 12;
+	public static final int DEFAULT_WAIT_AMOUNT = 250;
+	public static final int DEFAULT_RETRY_AMOUNT = 15;
 
 	public State state;
 	public DatagramSocket datagramSocket;
@@ -23,7 +23,7 @@ public class RTPSocket {
 	public long sequenceNumber;
 	public long ackNumber;
 
-	boolean stopAndWait;
+	public volatile boolean stopAndWait;
 
 	public CopyOnWriteArrayList<DatagramPacket> receiveSynRTPDatagramBuffer;
 
@@ -65,7 +65,9 @@ public class RTPSocket {
     			this.stopAndWait = false;
 
     			try {
-		    		this.bind(new InetSocketAddress("0.0.0.0",RTPSocket.getEphemeralPort(InetAddress.getLocalHost())));
+    				if (this.bindAddress == null){
+			    		this.bind(new InetSocketAddress("0.0.0.0",RTPSocket.getEphemeralPort(InetAddress.getLocalHost())));
+		    		}
 		    	} catch (Exception e){
 		    		e.printStackTrace();
 		    	}
@@ -105,20 +107,20 @@ public class RTPSocket {
 				    	} catch (Exception e){
 				    		e.printStackTrace();
 				    	}
-
-			    		if (state == RTPSocket.State.ESTABLISHED){
-			    			// Means that the ReceiveBufferThread accepted a SYN for us
-			    			return true;
-			    		} else {
-			    			// timeout for waiting for SYN basically
-			    			if (System.nanoTime() - firstNanoTime > 5000000){
-			    				RTPUtil.debug("connect(): ran out of time");
-			    				state = RTPSocket.State.CLOSED;
-			    			} else {
-			    				resolved = false;
-			    			}
-			    		}
 			    	}
+
+			    	if (state == RTPSocket.State.ESTABLISHED){
+		    			// Means that the ReceiveBufferThread accepted a SYN for us
+		    			return true;
+		    		} else {
+		    			// timeout for waiting for SYN basically
+		    			if (System.nanoTime() - firstNanoTime > 5000000){
+		    				RTPUtil.debug("connect(): ran out of time");
+		    				state = RTPSocket.State.CLOSED;
+		    			} else {
+		    				resolved = false;
+		    			}
+		    		}
 	    		}
 	    		break;
     	}
