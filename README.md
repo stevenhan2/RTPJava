@@ -1,15 +1,12 @@
-Instructions for running RTP basic server/client tests (Not FTA):
-
+##*Instructions for running RTP basic server/client tests (Not FTA):*
 RTPTestClient defaults to binding to port 4000 as a convenience for NetEmu. 
-
 1. make clean
 2. make test
 3. NetEmu 8000
 3. on one terminal run java RTPTestServer 4001 (or any other port)
 4. on one terminal run java RTPTestClient 8000 (or any other port, but they have to be the same)
 
-*Instructions to run FTAClient and FTAServer*
-
+##*Instructions to run FTAClient and FTAServer*
 1. make
 2. NetEmu 8000
 3. java FTAServer 8000 (or any other port) localhost 8000
@@ -18,15 +15,14 @@ RTPTestClient defaults to binding to port 4000 as a convenience for NetEmu.
 	connect-get connects to the server and gets the file from the server
 	close exists the program.
 
-*Implemented:*
-(x)	connect-get
-()	get 					RTP is bidirectional, but I ran out of time
-()	connect 				RTP is bidirectional, but I ran out of time
-(x)	post
-()	terminate				No time to implement, but would be part of state system with FIN flag and closing states similar to TCP
-()	window 					Did not implement pipelining
-()	disconnect 				No time to implement, but would be part of state system with FIN flag and closing
-
+##*What we implemented:*
+* YES	connect-get
+* NO	get 					RTP is bidirectional, but I ran out of time
+* NO	connect 				RTP is bidirectional, but I ran out of time
+* YES	post
+* NO	terminate				No time to implement, but would be part of * state system with FIN flag and closing states similar to TCP
+* NO	window 					Did not implement pipelining
+* NO	disconnect 				No time to implement, but would be part of state system with FIN flag and closing
 
 *I was able to send a file using:*
 0. make
