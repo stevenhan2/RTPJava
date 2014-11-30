@@ -12,19 +12,7 @@ public class FTAServer {
 		InetSocketAddress bindsource = null; 
 		
 		try{ 
-
-			
 			bindsource = new InetSocketAddress(args[1], bindport);
-
-			// int serverPort = Integer.parseInt(args[0]);
-			// ServerSocket listenSocket = new ServerSocket(serverPort); 
-			// boolean terminated = false;
-			// System.out.println("server start listening at port " + serverPort + "... ... ...");
-
-			// while(true){
-			// 	Socket clientSocket = listenSocket.accept(); 
-			// 	ConnectionThread c = new ConnectionThread(clientSocket);	
-			// }	
 		} catch (Exception e) {
 			System.out.println("Was unable to get ephemeral port and create source address");
 		}
@@ -45,18 +33,59 @@ public class FTAServer {
 			while (!accept){
 				accept = serverRTPSocket.accept();
 			}
-
 			System.out.println("Accept returned true");
-			// System.out.println(serverRTPSocket.toString());
 
-			String helloWorldString = new String(serverRTPSocket.receive());
-			System.out.println("helloWorldString:" + helloWorldString);
+			String commandString = new String(serverRTPSocket.receive());
+			System.out.println("commandString:" + commandString);
 
-			String foobarString = new String(serverRTPSocket.receive());
-			System.out.println("foobarString:" + foobarString);
+			String parts[] = commandString.split(" ");
+			String command = parts[0];
+			System.out.println("command:" + command);
+
+			if (command.equalsIgnoreCase("connect-get")){
+				byte[] file = FTAServer.readBytes(parts[1]);
+				serverRTPSocket.send(file);
+			} else if command.equalsIgnoreCase("post"){
+
+				String[] fileParts = (parts[1]).split("/");
+				String filename = fileParts[fileParts.length - 1];
+
+				byte[] toWriteBytes = serverRTPSocket.receive();
+				writeBytes(filename, toWriteBytes);
+			}
 
 			System.out.println(serverRTPSocket.toString());
 		}
+	}
+
+
+	public static byte[] readBytes(String fileName) {
+    	
+    	try {
+    		BufferedReader br = new BufferedReader(new FileReader(fileName));
+       		RandomAccessFile f = new RandomAccessFile(fileName, "r");
+			byte[] b = new byte[(int)f.length()];
+			f.read(b);
+			br.close();
+			return b;
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
+
+    	return null;
+	}
+
+	public static boolean writeBytes(String fileName, byte[] b){
+		try {
+			FileOutputStream fos = new FileOutputStream(fileName);
+			fos.write(b);
+			fos.close();
+			return true;
+		} catch (Exception e) {
+    		e.printStackTrace();
+    	}
+
+    	return false;
 	}
 
 }
@@ -119,5 +148,6 @@ class ConnectionThread extends Thread {
 			  catch (IOException e){/*close failed*/}
 			}
 		}
+
 }
 
