@@ -36,6 +36,9 @@ public class RTPTestServer {
 			String helloWorldString = new String(serverRTPSocket.receive());
 			System.out.println("helloWorldString:" + helloWorldString);
 
+			String foobarString = new String(serverRTPSocket.receive());
+			System.out.println("foobarString:" + foobarString);
+
 			System.out.println(serverRTPSocket.toString());
 		}	
     }

@@ -8,6 +8,7 @@ public class RTPTestClient {
 		int bindPort = 0;
 
 		byte[] helloWorldData = "Hello World!".getBytes();
+		byte[] foobarData = "FOObar World!".getBytes();
 
 		InetSocketAddress bindsource = null;
 		InetSocketAddress destination = null;
@@ -31,6 +32,7 @@ public class RTPTestClient {
 			if (connection){
 				System.out.println("Trying to send \"Hello World!\"");
 				clientRTPSocket.send(helloWorldData);
+				clientRTPSocket.send(foobarData);
 			}
 		}	
     }
