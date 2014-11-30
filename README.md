@@ -1,3 +1,5 @@
+Visit https://github.com/wufufufu/RTPJava for markdown README for convenience
+
 ##*Instructions for running RTP basic server/client tests (Not FTA):*
 RTPTestClient defaults to binding to port 4000 as a convenience for NetEmu. 
 1. make clean
