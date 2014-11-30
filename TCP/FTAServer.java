@@ -6,20 +6,57 @@ import java.util.*;
 
 
 public class FTAServer { 
-  	public static void main (String args[]){ 
+  	public static void main (String args[]){
+  		System.out.println("Beginning FTAServer");
+		int bindport = Integer.parseInt(args[0]);
+		InetSocketAddress bindsource = null; 
+		
 		try{ 
-			int serverPort = Integer.parseInt(args[0]);
-			ServerSocket listenSocket = new ServerSocket(serverPort); 
-			boolean terminated = false;
-			System.out.println("server start listening at port " + serverPort + "... ... ...");
 
-			while(true){
-				Socket clientSocket = listenSocket.accept(); 
-				ConnectionThread c = new ConnectionThread(clientSocket);	
-			}	
-		} catch(IOException e) {
-			System.out.println("Listen :"+e.getMessage());
-		} 
+			
+			bindsource = new InetSocketAddress(args[1], bindport);
+
+			// int serverPort = Integer.parseInt(args[0]);
+			// ServerSocket listenSocket = new ServerSocket(serverPort); 
+			// boolean terminated = false;
+			// System.out.println("server start listening at port " + serverPort + "... ... ...");
+
+			// while(true){
+			// 	Socket clientSocket = listenSocket.accept(); 
+			// 	ConnectionThread c = new ConnectionThread(clientSocket);	
+			// }	
+		} catch (Exception e) {
+			System.out.println("Was unable to get ephemeral port and create source address");
+		}
+
+		if (bindsource != null){
+			System.out.println("Creating RTPSocket to serve on " + bindport);
+			RTPSocket serverRTPSocket = new RTPSocket();
+
+			System.out.println("Trying to bind to localhost:" + bindport);
+			boolean bindTry = serverRTPSocket.bind(bindsource);
+			System.out.println("Bind success: " + bindTry);
+
+			System.out.println("Listening");
+			serverRTPSocket.listen();
+
+			System.out.println("Accept loop begin");
+			boolean accept = false;
+			while (!accept){
+				accept = serverRTPSocket.accept();
+			}
+
+			System.out.println("Accept returned true");
+			// System.out.println(serverRTPSocket.toString());
+
+			String helloWorldString = new String(serverRTPSocket.receive());
+			System.out.println("helloWorldString:" + helloWorldString);
+
+			String foobarString = new String(serverRTPSocket.receive());
+			System.out.println("foobarString:" + foobarString);
+
+			System.out.println(serverRTPSocket.toString());
+		}
 	}
 
 }

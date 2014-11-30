@@ -8,7 +8,7 @@ public class RTPTestServer {
 		InetSocketAddress bindsource = null;
 
 		try {
-			bindsource = new InetSocketAddress("0.0.0.0", bindport);
+			bindsource = new InetSocketAddress("localhost", bindport);
 		} catch (Exception e) {
 			System.out.println("Was unable to get ephemeral port and create source address");
 		}
