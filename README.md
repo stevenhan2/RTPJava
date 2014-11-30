@@ -1,9 +1,12 @@
 Instructions for running RTP basic server/client tests (Not FTA):
 
+RTPTestClient defaults to binding to port 4000 as a convenience for NetEmu. 
+
 1. make clean
 2. make test
-3. on one terminal run java RTPTestServer 8888 (or any other port)
-4. on one terminal run java RTPTestClient 8888 (or any other port, but they have to be the same)
+3. NetEmu 8000
+3. on one terminal run java RTPTestServer 4001 (or any other port)
+4. on one terminal run java RTPTestClient 8000 (or any other port, but they have to be the same)
 
 Instructions to run FTAClient and FTAServer
 
