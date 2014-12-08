@@ -1,7 +1,7 @@
 import java.io.*;
 import java.util.Arrays;
 public class RTPUtil {
-	public static final boolean DEBUG = true;
+	public static final boolean DEBUG = false;
 	
 	// Byte utilities
 	// --------------------------------------------------------

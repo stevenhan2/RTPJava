@@ -1,7 +1,8 @@
 Visit https://github.com/wufufufu/RTPJava for markdown README for convenience
 
 ##*Instructions for running RTP basic server/client tests (Not FTA):*
-RTPTestClient defaults to binding to port 4000 as a convenience for NetEmu. 
+RTPTestClient defaults to binding to port 4000 as a convenience for NetEmu.
+
 1. make clean
 2. make test
 3. NetEmu 8000
@@ -27,6 +28,7 @@ RTPTestClient defaults to binding to port 4000 as a convenience for NetEmu.
 * NO	disconnect 				No time to implement, but would be part of state system with FIN flag and closing
 
 *I was able to send a file using:*
+
 0. make
 1. python NetEmu.py 8000 -l 10 -c 10 -d 10 -D 100 -r 25
 2. java FTAServer 5001 localhost 8000
